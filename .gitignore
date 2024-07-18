@@ -1,4 +1,5 @@
 BABIES/MRI/newborn/bids/*
+BABIES/MRI/newborn/bids/.bidsignore
 !BABIES/MRI/newborn/bids/
 !BABIES/MRI/newborn/bids/dataset_description.json
 BABIES/MRI/newborn/derivatives/precomputed/*
@@ -16,6 +17,7 @@ BABIES/MRI/newborn/SW_ROI
 
 BABIES/MRI/six_month/bids/*
 !BABIES/MRI/six_month/bids/
+BABIES/MRI/newborn/bids/.bidsignore
 !BABIES/MRI/six_month/bids/dataset_description.json
 BABIES/MRI/six_month/derivatives/precomputed/*
 !BABIES/MRI/six_month/derivatives/precomputed/
