@@ -34,7 +34,7 @@ BABIES/MRI/six_month/derivatives/recon-all/*
 !BABIES/MRI/six_month/derivatives/recon-all/
 !BABIES/MRI/six_month/derivatives/recon-all
 
-BABIES/MRI/six_month/derivatives/work/nibabies_work/*
+BABIES/MRI/six_month/derivatives/work/nibabies_work/sub-*
 !BABIES/MRI/six_month/derivatives/work/nibabies_work/
 
 BABIES-Tracking/
