@@ -1,33 +1,41 @@
 BABIES/MRI/newborn/bids/*
 !BABIES/MRI/newborn/bids/
 !BABIES/MRI/newborn/bids/dataset_description.json
+
+BABIES/MRI/newborn/derivatives/precomputed/*
+!BABIES/MRI/newborn/derivatives/precomputed/
 !BABIES/MRI/newborn/derivatives/precomputed/dataset_description.json
 
+BABIES/MRI/newborn/derivatives/recon-all/*
+!BABIES/MRI/newborn/derivatives/recon-all/
+
+BABIES/MRI/newborn/derivatives/work/nibabies_work/*
+!BABIES/MRI/newborn/derivatives/work/nibabies_work/
 
 BABIES/MRI/*.txt
 BABIES/MRI/newborn/derivatives/Nibabies/*
-BABIES/MRI/newborn/derivatives/precomputed/sub-*
-BABIES/MRI/newborn/derivatives/recon-all/sub-*
-BABIES/MRI/newborn/derivatives/work/*
 BABIES/MRI/newborn/SW_ROI
 BABIES/MRI/newborn/.bidsignore
 
 
+BABIES/MRI/newborn/.bidsignore
+
 BABIES/MRI/six_month/bids/*
 !BABIES/MRI/six_month/bids/
-BABIES/MRI/newborn/bids/.bidsignore
 !BABIES/MRI/six_month/bids/dataset_description.json
+
 BABIES/MRI/six_month/derivatives/precomputed/*
 !BABIES/MRI/six_month/derivatives/precomputed/
 !BABIES/MRI/six_month/derivatives/precomputed/dataset_description.json
 
-BABIES/MRI/six_month/bids/sub-*/
 BABIES/MRI/six_month/derivatives/Nibabies/*
-BABIES/MRI/six_month/derivatives/precomputed/sub-*
-BABIES/MRI/six_month/derivatives/recon-all/sub-*
-BABIES/MRI/six_month/derivatives/work/*
-BABIES/MRI/six_month/.bidsignore
 
+BABIES/MRI/six_month/derivatives/recon-all/*
+!BABIES/MRI/six_month/derivatives/recon-all/
+!BABIES/MRI/six_month/derivatives/recon-all
+
+BABIES/MRI/six_month/derivatives/work/nibabies_work/*
+!BABIES/MRI/six_month/derivatives/work/nibabies_work/
 
 BABIES-Tracking/
 project_tracking/
