@@ -8,9 +8,13 @@ BABIES/MRI/newborn/derivatives/precomputed/*
 
 BABIES/MRI/newborn/derivatives/recon-all/*
 !BABIES/MRI/newborn/derivatives/recon-all/
+!BABIES/MRI/newborn/derivatives/recon-all/.gitkeep
+
 
 BABIES/MRI/newborn/derivatives/work/nibabies_work/*
 !BABIES/MRI/newborn/derivatives/work/nibabies_work/
+!BABIES/MRI/newborn/derivatives/work/nibabies_work/.gitkeep
+
 
 BABIES/MRI/*.txt
 BABIES/MRI/newborn/derivatives/Nibabies/*
@@ -19,6 +23,7 @@ BABIES/MRI/newborn/.bidsignore
 
 
 BABIES/MRI/newborn/.bidsignore
+BABIES/MRI/six_month/.bidsignore
 
 BABIES/MRI/six_month/bids/*
 !BABIES/MRI/six_month/bids/
@@ -34,8 +39,9 @@ BABIES/MRI/six_month/derivatives/recon-all/sub-*
 !BABIES/MRI/six_month/derivatives/recon-all/
 !BABIES/MRI/six_month/derivatives/recon-all
 
-BABIES/MRI/six_month/derivatives/work/nibabies_work/sub-*
+BABIES/MRI/six_month/derivatives/work/nibabies_work/*
 !BABIES/MRI/six_month/derivatives/work/nibabies_work/
+!BABIES/MRI/six_month/derivatives/work/nibabies_work/.gitkeep
 
 BABIES-Tracking/
 project_tracking/
