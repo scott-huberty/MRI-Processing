@@ -11,7 +11,7 @@ BABIES/MRI/newborn/bids/sub-*
 BABIES/MRI/newborn/derivatives/Nibabies/*
 BABIES/MRI/newborn/derivatives/precomputed/sub-*
 BABIES/MRI/newborn/derivatives/recon-all/sub-*
-BABIES/MRI/newborn/derivatvies/work/*
+BABIES/MRI/newborn/derivatives/work/*
 BABIES/MRI/newborn/SW_ROI
 
 BABIES/MRI/six_month/bids/*
