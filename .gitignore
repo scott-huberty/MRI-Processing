@@ -18,3 +18,4 @@ project_tracking/
 __pycache__/
 *.log
 .DS_Store
+*.txt
