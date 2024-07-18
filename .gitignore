@@ -30,7 +30,7 @@ BABIES/MRI/six_month/derivatives/precomputed/*
 
 BABIES/MRI/six_month/derivatives/Nibabies/*
 
-BABIES/MRI/six_month/derivatives/recon-all/*
+BABIES/MRI/six_month/derivatives/recon-all/sub-*
 !BABIES/MRI/six_month/derivatives/recon-all/
 !BABIES/MRI/six_month/derivatives/recon-all
 
