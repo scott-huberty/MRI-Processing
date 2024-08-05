@@ -1,19 +1,20 @@
 import argparse
 from pathlib import Path
 
-import seababies as sea
-
+from utils.config import SubjectConfig
+from utils.utils import do_rsync
 
 def rsync_to_server(**kwargs):
     # get the subject id, session id, and project name
     subject = kwargs["subject"]
     session = kwargs["session"]
     project = kwargs["project"]
+    anat_only = kwargs.get("anat_only", False)
     surface_recon_method = kwargs["surface_recon_method"]
     session_subdir = "six_month" if session == "sixmonth" and project == "BABIES" else session
 
     # create a subject config object with the paths to their files populated
-    config = sea.config.SubjectConfig(project, subject, session)
+    config = SubjectConfig(project, subject, session, anat_only=anat_only)
     config.check_paths(local=True, server=False, mode="error")
 
     derivatives_path = config.local_paths["derivatives"]
@@ -62,7 +63,7 @@ def rsync_to_server(**kwargs):
     for path, server_path in zip(paths, server_paths):
         if path.exists():
             print(f"Pushing {path} to {server_path}")
-            sea.utils.do_rsync(path, server_path, flags="-rltv")
+            do_rsync(path, server_path, flags="-rltv")
         else:
             print(f"{path} does not exist. Skipping.")
 
@@ -74,6 +75,7 @@ def parse_args():
     parser.add_argument('subject', type=str, help='subject label. such as 1103')
     parser.add_argument('session', choices=["newborn", "sixmonth"], type=str, help='session label, such as newborn')
     parser.add_argument("surface_recon_method", choices=["mcribs", "freesurfer"], help="surface reconstruction method, such as mcribs.")
+    parser.add_argument("anat_only", action="store_true", help="Only push the anatomical data.")
     args = parser.parse_args()
     return vars(args)
 
