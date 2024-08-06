@@ -116,7 +116,7 @@ class SubjectConfig(Config):
                     else:
                         if "HumphreysLab" in path.parts:
                             extra_msg = "\n MRI-Processing NOTE: If you are not on the Whale computer, pass server_is_mounted=False to the SubjectConfig constructor."
-                            raise f"{e} {extra_msg}"
+                            raise FileNotFoundError(f"{str(e)} {extra_msg}") from e
                         raise e
 
     def _check_path(self, path, name, mode="raise"):
