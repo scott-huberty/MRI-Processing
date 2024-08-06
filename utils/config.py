@@ -50,7 +50,7 @@ class SubjectConfig(Config):
         self["session"] = _get_session(session)
         self["base_path"] = dict(
             server=Path("/Volumes/HumphreysLab/Daily_2") / project / "MRI",
-            local=Path("/Users/sealab/MRI_Processing") / project / "MRI",
+            local=Path("~/MRI_Processing") / project / "MRI",
         )
         self["server_paths"] = dict()
         self["local_paths"] = dict()
