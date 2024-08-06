@@ -147,8 +147,13 @@ def pull_subject_files(
 
     server_is_mounted = ip_address is None
 
-    if not input_dir.exists():
+    if not input_dir.exists() and server_is_mounted:
         raise FileNotFoundError(f"{input_dir} does not exist")
+    else:
+        warn(
+            "You are pulling files from a remote server. We cannot assure that the directories"
+            f" you are trying to pull actually exist. Trying to pull: {input_dir}\n"
+        )
     if not output_dir.exists() and server_is_mounted:
         raise FileNotFoundError(f"{output_dir.resolve()} does not exist")
     if not subject_id.isnumeric():
