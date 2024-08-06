@@ -114,9 +114,10 @@ class SubjectConfig(Config):
                     ):
                         logger.debug(e)
                     else:
-                        if location == "server":
+                        if "HumphreysLab" in path.parts:
                             extra_msg = "\n MRI-Processing NOTE: If you are not on the Whale computer, pass server_is_mounted=False to the SubjectConfig constructor."
-                        raise e + extra_msg
+                            raise e + extra_msg
+                        raise e
 
     def _check_path(self, path, name, mode="raise"):
         """Check if a path exists."""
