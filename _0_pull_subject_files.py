@@ -1,7 +1,6 @@
 import argparse
 
-import seababies as sea
-
+from utils.run import prepare_subject_files
 
 def main(**kwargs):
     # get the subject id, session id, and project name
@@ -9,7 +8,7 @@ def main(**kwargs):
     session = kwargs["session"]
     project = kwargs["project"]
     anat_only = kwargs.get("anat_only", False)
-    sea.run.prepare_subject_files(project, subject, session, anat_only=anat_only)
+    prepare_subject_files(project, subject, session, anat_only=anat_only)
 
 
 def parse_args():
