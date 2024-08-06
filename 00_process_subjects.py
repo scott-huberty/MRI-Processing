@@ -5,8 +5,6 @@ import subprocess
 import sys
 from pathlib import Path
 
-import seababies as sea
-
 import _0_pull_subject_files
 import _1_run_nibabies
 import _2_push_derivatives
@@ -102,12 +100,19 @@ def process_one_subject(
     version="latest",
     use_dev=False,
     nibabies_path=None,
+    ip_address=None,
+    username=None,
 ):
     """Process one subject. Use subprocess to run individual scripts."""
     print(f" 👇 Processing started for subject {subject} {session}👇 \n")
     # Pull down the subject files from the server
     _0_pull_subject_files.main(
-        project=project, subject=subject, session=session, anat_only=anat_only
+        project=project,
+        subject=subject,
+        session=session,
+        anat_only=anat_only,
+        ip_address=ip_address,
+        username=username,
     )
     # run nibabies
     _1_run_nibabies.main(
@@ -126,6 +131,8 @@ def process_one_subject(
         subject=subject,
         session=session,
         surface_recon_method=surface_recon_method,
+        ip_address=ip_address,
+        username=username,
     )
     # Clean up local files
     _3_delete_local_directories.clean_up(
@@ -147,6 +154,8 @@ def main(**kwargs):
     version = kwargs["version"]
     use_dev = kwargs.get("use_dev", False)
     nibabies_path = kwargs.get("nibabies_path", None)
+    ip_address = kwargs.get("ip_address", None)
+    username = kwargs.get("username", None)
 
     assert isinstance(anat_only, bool), "anat_only must be a boolean."
     for subject in subjects:
@@ -161,6 +170,8 @@ def main(**kwargs):
             version=version,
             use_dev=use_dev,
             nibabies_path=nibabies_path,
+            ip_address=ip_address,
+            username=username,
         )
 
 
