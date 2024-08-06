@@ -45,9 +45,9 @@ def parse_args():
         "-m",
         "--surface-recon-method",
         choices=["mcribs", "freesurfer"],
-        required=True,
+        default="freesurfer",
         dest="surface_recon_method",
-        help="surface reconstruction method, such as mcribs.",
+        help="surface reconstruction method. Must be 'mcribs' or 'freesurfer'.",
     )
     parser.add_argument(
         "--anat_only",
