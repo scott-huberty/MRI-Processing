@@ -1,8 +1,6 @@
 import argparse
 from pathlib import Path
 
-import seababies as sea
-
 from utils.docker import run_nibabies
 
 
