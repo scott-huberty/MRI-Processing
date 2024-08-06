@@ -1,8 +1,7 @@
 import argparse
 from pathlib import Path
 
-import seababies as sea
-
+from utils.utils import delete_directory
 
 def clean_up(subject, session, project, surface_recon_method):
     # get the subject id, session id, and project name
@@ -43,7 +42,7 @@ def clean_up(subject, session, project, surface_recon_method):
     for path in paths:   
         if path.exists() and path.is_dir():
             print(f"Removing {path}")
-            sea.utils.delete_directory(path)
+            delete_directory(path)
         else:
             print(f"{path} does not exist or is not a directory. Skipping.")
 
