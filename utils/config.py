@@ -55,6 +55,7 @@ class SubjectConfig(Config):
         self["server_paths"] = dict()
         self["local_paths"] = dict()
         self["anat_only"] = anat_only
+        self["server_is_mounted"] = server_is_mounted
         self.populate_server_fpaths(check=server_is_mounted)
         self.populate_local_fpaths(
             get_spatial_file=get_spatial_file,

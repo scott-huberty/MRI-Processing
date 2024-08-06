@@ -53,11 +53,17 @@ def prepare_subject_files(
         does nothing if the IP address is None, but raises an error if the IP address
         is not None.
     """
+    server_is_mounted = ip_address is None
 
     if check_args is None:
         check_args = {"local": True, "server": False, "mode": "error"}
     config = SubjectConfig(
-        project, subject_id, session, get_spatial_file=False, anat_only=anat_only
+        project,
+        subject_id,
+        session,
+        get_spatial_file=False,
+        anat_only=anat_only,
+        server_is_mounted=server_is_mounted,
     )
     project = config["project"]
     subject_id = config["subject_id"]
