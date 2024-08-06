@@ -7,6 +7,11 @@ from .config import Config
 
 BABIES_SERVER = Path("/Volumes") / "HumphreysLab" / "Daily_2" / "BABIES" / "MRI"
 
+def get_whale_address():
+    """Get the IP address of the Whale server."""
+   return "'SEA Lab'@10.2.141.209"
+
+
 
 def rsync_to_server(project, subject, session, dry_run=False, verbose="INFO"):
     """Use rsync to send files in Documents/MRI to the HumphreysLab server.
@@ -75,7 +80,17 @@ def rsync_to_server(project, subject, session, dry_run=False, verbose="INFO"):
 
 
 def pull_subject_files(
-    project, subject_id, session, output_dir, dry_run=False, anat_only=False, pull_dwi=False, verbose="INFO"):
+    project,
+    subject_id,
+    session,
+    output_dir,
+    *,
+    dry_run=False,
+    anat_only=False,
+    pull_dwi=False,
+    ip_address=None,
+    username=None,
+    verbose="INFO"):
     """use rsync to pull the bids directory from 1 subject for a project like BABIES.
 
     Parameters
@@ -95,6 +110,16 @@ def pull_subject_files(
         committing to the result. Default is False.
     pull_dwi : bool
         If True, the function will pull the bids dwi directory. Default is False.
+    ip_address : str
+        The IP address of the whale computer, for example format "XX.X.XXX.XXX".
+        Default is None, which assumes that the HumphreysLab server is mounted on
+        the local computer. This option is useful if you are running this function
+        on a remote computer such as the ACCRE cluster.
+    username : str
+        If ip_address is not None, The username to use when connecting to the whale
+        computer, for example "Lab Username". Default is None, which does not do
+        anything if ip_address is None as well, but will raise an error if ip_address
+        is not None and username is None.
     """
     BABIES = Path("/Volumes") / "HumphreysLab" / "Daily_2" / "BABIES" / "MRI"
     ABC = Path("/Volumes") / "HumphreysLab" / "Daily_2" / "ABC" / "MRI"
@@ -110,31 +135,50 @@ def pull_subject_files(
     # CHECKS
     ##########################################################################
 
+    # if one of ip_address or username is not None, then both must be provided
+    need_username = ip_address is not None and username is None
+    need_ip_address = ip_address is None and username is not None
+    if need_username or need_ip_address:
+        raise ValueError("If either ip_address or username is not None, the other must be provided."
+                         f" Got ip_address={ip_address} and username={username}")
+
+    server_is_mounted = ip_address is None
+
     if not input_dir.exists():
         raise FileNotFoundError(f"{input_dir} does not exist")
-    if not output_dir.exists():
+    if not output_dir.exists() and server_is_mounted:
         raise FileNotFoundError(f"{output_dir.resolve()} does not exist")
     if not subject_id.isnumeric():
         raise ValueError(
-            "subject_id must be a number, but got: {subject_id}\n" "Example: 12001 for sub-12001"
+            f"subject_id must be a number, but got: {subject_id}\n" "Example: 12001 for sub-12001"
         )
     subject = f"sub-{subject_id}"
 
     if session not in ["newborn", "six_month"]:
-        raise ValueError("session must be either 'newborn' 'sixmonth', or 'six_month'," " but got: {session}")
+        raise ValueError(f"session must be either 'newborn' 'sixmonth', or 'six_month'," " but got: {session}")
     if not isinstance(anat_only, bool):
         raise ValueError(f"anat_only must be a True or False, but got: {anat_only}")
     if verbose not in ["QUIET", "INFO", "DEBUG"]:
         raise ValueError(
-            "verbose must be either 'QUIET', 'INFO', or 'DEBUG'," " but got: {verbose}"
+            f"verbose must be either 'QUIET', 'INFO', or 'DEBUG', but got: {verbose}"
         )
 
+ 
     session_dir = input_dir / f"{session}"
-    assert session_dir.exists(), f"{session_dir} does not exist"
     bids_dir = session_dir / "bids" / subject
-    assert bids_dir.exists(), f"{bids_dir} does not exist"
     recon_dir = session_dir / "derivatives" / "recon-all" / subject
-    assert recon_dir.exists(), f"{recon_dir} does not exist"
+
+    if server_is_mounted:
+        assert session_dir.exists(), f"{session_dir} does not exist"
+        assert bids_dir.exists(), f"{bids_dir} does not exist"
+        assert recon_dir.exists(), f"{recon_dir} does not exist"
+    else:
+        warn("You are pulling files from a remote server. We cannot assure that the directories\n"
+             " you are trying to pull actually exist. Here are the directories we are trying to pull:\n"
+             f"    {bids_dir}\n"
+             f"    {recon_dir}\n"
+             f"    {session_dir}\n"
+             )
 
     ##########################################################################
     # COPY
@@ -147,12 +191,22 @@ def pull_subject_files(
     filter_dwi = not pull_dwi
     filter_fpath = create_filter_file(output_dir, subject_id, session, anat_only=anat_only, filter_dwi=filter_dwi)
     rsync_input = f"{str(input_dir.parent.parent)}/./{project}/MRI/{session}"
+    if ip_address is not None:
+        rsync_input = f"{username}@{ip_address}:" + rsync_input
     do_rsync(rsync_input, output_dir, filter_file=filter_fpath, dry_run=dry_run, verbose=verbose)
 
 
-
-def do_rsync(input_dir, output_dir, filter_file=None, dry_run=False, flags="-ahR", verbose="INFO"):
-    assert Path(input_dir).exists(), f"{input_dir} does not exist"
+def do_rsync(input_dir,
+             output_dir,
+             filter_file=None,
+             dry_run=False,
+             flags="-ahR",
+             server_is_mounted=True,
+             verbose="INFO"
+             ):
+    """Use rsync to copy files from one directory to another."""
+    if server_is_mounted:
+        assert Path(input_dir).exists(), f"{input_dir} does not exist"
     assert output_dir.exists(), f"{output_dir} does not exist"
     flags = flags
     if verbose == "INFO":
@@ -172,7 +226,9 @@ def do_rsync(input_dir, output_dir, filter_file=None, dry_run=False, flags="-ahR
         ]
     if filter_file is not None:
         command += [f"--filter=merge {filter_file}"]
+    print("\n")
     print(" ".join(command))
+    print("\n")
     subprocess.run(command)
     
 
