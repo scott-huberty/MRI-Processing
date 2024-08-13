@@ -5,22 +5,21 @@ These scripts facilitate processing MRI files from the SEAlab BABIES and ABC stu
 ## Quick Links
 - [Running on WHALE](#Running-from-the-Whale-Computer)
 
-- [Running on ACCRE](#Running-the-Pipeline-on-the-ACCRE-Cluster.)
+- [Running on ACCRE](#Running-the-Pipeline-on-the-ACCRE-Cluster)
 
   - [submitting a SLURM job](#Submit-a-SLURM-job-to-process-these-files-with-Nibabies)
 
-  - [Inspecting the status or success of a job](3Inspecting-the-log-files-for-a-job/Nibabies-run)
+  - [Inspecting the status or success of a job](#Inspecting-the-log-files-for-a-job/Nibabies-run)
 
 ## Running from the Whale Computer
 
-This repository is already cloned on the Whale Computer at `/Users/sealab/MRI_Processing`. To use it, do the following:
-
-From the terminal, assuming you are on the WHALE computer file system
+- This repository is already cloned on the Whale Computer at `/Users/sealab/MRI_Processing`.
+- From the terminal, assuming you are on the WHALE computer file system:
 
 ### Reset the Conda environemnt and activate this virtual environment
-1. Conda deactivate.
-2. Conda activate
-3. Conda activate mri_processing
+1. `conda deactivate`
+2. `conda activate`
+3. `conda activate mri_processing`
 
 ### Move to the directory for this Repository
 ```bash
