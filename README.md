@@ -14,12 +14,17 @@ These scripts facilitate processing MRI files from the SEAlab BABIES and ABC stu
 ## Running from the Whale Computer
 
 - This repository is already cloned on the Whale Computer at `/Users/sealab/MRI_Processing`.
-- From the terminal, assuming you are on the WHALE computer file system:
 
 ### Reset the Conda environemnt and activate this virtual environment
-1. `conda deactivate`
-2. `conda activate`
-3. `conda activate mri_processing`
+
+From the terminal, assuming you are on the WHALE computer file system:
+
+```bash
+conda deactivate
+conda activate
+conda activate mri_processing
+which python
+```
 
 ### Move to the directory for this Repository
 ```bash
