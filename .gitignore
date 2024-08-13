@@ -47,6 +47,7 @@ BABIES-Tracking/
 project_tracking/
 
 SLURM/log/*.out
+!SLURM/log/
 
 __pycache__/
 *.log

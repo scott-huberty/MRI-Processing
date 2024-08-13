@@ -64,6 +64,7 @@ SCRATCH_DIR="$DERIVATIVES_DIR/work/nibabies_work"
 PRECOMPUTED_DIR="$DERIVATIVES_DIR/precomputed"
 LICENSE_FILE="$ROOT_DIR/utils/assets/license.txt"
 
+# XXX: add arguments for anat_only, CIFTI output?
 # Execute the Singularity command
 singularity run -e \
   -B ${BIDS_DIR}:/data:ro \
