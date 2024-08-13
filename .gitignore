@@ -46,6 +46,8 @@ BABIES/MRI/six_month/derivatives/work/nibabies_work/*
 BABIES-Tracking/
 project_tracking/
 
+SLURM/log/*.out
+
 __pycache__/
 *.log
 .DS_Store
