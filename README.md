@@ -64,6 +64,18 @@ ipython --pdb -- 00_process_subjects.py --project "BABIES" --subjects "1073" "13
 
 A few extra steps are required to process files on the ACCRE Cluster. Instead of using `00_process-subjects`, we will manually execute the following steps
 
+### Clone this repository
+
+> [!IMPORTANT]
+> You MUST clone this repository to your home folder. If you don't the scripts WON'T work!
+
+```bash
+cd ~/
+git clone https://github.com/scott-huberty/MRI-Processing.git
+```
+
+Or better yet, replace `scott-huberty` with your fork of this repository.
+
 ### copy the necessary files for each subject we want to process:
 
 For example
