@@ -76,6 +76,25 @@ git clone https://github.com/scott-huberty/MRI-Processing.git
 
 Or better yet, replace `scott-huberty` with your fork of this repository.
 
+### Create and activate a virtual environment
+
+I usually like to keep my python virtual environments in a dedicated folder, like below:
+
+```bash
+
+mkdir ~/dev
+mkdir ~/dev/venvs
+
+python -m ~/dev/venvs/my_virtual_env
+
+source ~/dev/venvs/my_virtual_env/bin/activate
+
+pip install ipython
+```
+
+You can replace `my_virtual_env` with any name you like (for example, `mri_processing`)
+
+
 ### copy the necessary files for each subject we want to process:
 
 For example
