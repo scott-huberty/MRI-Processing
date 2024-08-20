@@ -432,6 +432,7 @@ def create_filter_file(
         f"- {session_dir}/trash/**",
         f"- {session_dir}/sourcedata/**",
         f"- {session_dir}/data_share/**",
+        f"- {session_dir}/Test Scan/**",
         f"- {session_dir}/.DS_Store",
         f"- {session_dir}/CABINET_Processing_IDs.xlsx",
         f"- {session_dir}/dataset_description.json",
