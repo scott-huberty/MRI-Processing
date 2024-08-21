@@ -12,12 +12,14 @@ def prepare_subject_files(
     project,
     subject_id,
     session,
-    mri_processing_dir=None,
+    *,
     anat_only=False,
-    dry_run=False,
-    check_args=None,
+    bids_only=False,
     ip_address=None,
     username=None,
+    dry_run=False,
+    check_args=None,
+    mri_processing_dir=None,
     verbose="INFO",
 ):
     """Prepare the files for a single subject to be run through Nibabies.
@@ -36,6 +38,8 @@ def prepare_subject_files(
         directory. If not None, this should be the path to the MRI-Processing directory.
     anat_only : bool, optional
         If true, only pull files for the anatomical data. Default is False.
+    bids_only : bool, optional
+        If true, only pull files for the BIDS data. Default is False.
     dry_run : bool, optional
         If true, do not actually run the rsync commands, i.e. do not actually pull the
         data files, just print them. Default is False.
@@ -63,6 +67,7 @@ def prepare_subject_files(
         session,
         get_spatial_file=False,
         anat_only=anat_only,
+        bids_only=bids_only,
         server_is_mounted=server_is_mounted,
     )
     project = config["project"]
@@ -76,6 +81,7 @@ def prepare_subject_files(
         session,
         output_dir=p_root,
         anat_only=anat_only,
+        bids_only=bids_only,
         dry_run=dry_run,
         ip_address=ip_address,
         username=username,
@@ -85,6 +91,9 @@ def prepare_subject_files(
     config.get_spatial_file()
     config.check_paths(local=True, server=False, mode="error")
     rename_t1w_files(config["local_paths"]["sub_anatpath"])
+
+    if bids_only:
+        return
 
     create_precomputed_files(
         reconall_dir=config["local_paths"]["reconall"],

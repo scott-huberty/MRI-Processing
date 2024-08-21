@@ -3,19 +3,23 @@ import argparse
 from utils.run import prepare_subject_files
 
 
-def main(**kwargs):
+def main(
+    subject,
+    session,
+    project,
+    *,
+    anat_only=False,
+    bids_only=False,
+    ip_address=None,
+    username=None
+    ):
     # get the subject id, session id, and project name
-    subject = kwargs["subject"]
-    session = kwargs["session"]
-    project = kwargs["project"]
-    anat_only = kwargs.get("anat_only", False)
-    ip_address = kwargs.get("ip_address", None)
-    username = kwargs.get("username", None)
     prepare_subject_files(
         project,
         subject,
         session,
         anat_only=anat_only,
+        bids_only=bids_only,
         ip_address=ip_address,
         username=username,
     )

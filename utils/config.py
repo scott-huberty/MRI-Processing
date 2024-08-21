@@ -35,26 +35,28 @@ class SubjectConfig(Config):
         project,
         subject_id,
         session,
+        *,
         spatial_file=None,
         get_spatial_file=True,
         check_local_paths=False,
         anat_only=False,
+        bids_only=False,
         server_is_mounted=True,
-        *args,
         **kwargs,
     ):
-        super().__init__(*args, **kwargs)
+        super().__init__(**kwargs)
         self.__dict__ = self
         self["project"] = project
         self["subject_id"] = subject_id
         self["session"] = _get_session(session)
         self["base_path"] = dict(
             server=Path("/Volumes/HumphreysLab/Daily_2") / project / "MRI",
-            local=(Path(__file).parent.parent / project / "MRI"),
+            local=(Path(__file__).parent.parent / project / "MRI"),
         )
         self["server_paths"] = dict()
         self["local_paths"] = dict()
         self["anat_only"] = anat_only
+        self["bids_only"] = bids_only
         self["server_is_mounted"] = server_is_mounted
         self.populate_server_fpaths(check=server_is_mounted)
         self.populate_local_fpaths(
@@ -112,6 +114,12 @@ class SubjectConfig(Config):
                         name.endswith("func")
                         or name.endswith("funcpath")
                         or name.endswith("fmappath")
+                    ):
+                        logger.debug(e)
+                    elif self["bids_only"] and (
+                        name.endswith("recon-all")
+                        or name.endswith("precomputed")
+                        or name.endswith("nibabies")
                     ):
                         logger.debug(e)
                     else:
