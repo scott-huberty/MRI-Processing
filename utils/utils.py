@@ -463,6 +463,7 @@ def create_filter_file(
         f"- {session_dir}/dataset_description.json",
         f"- {session_dir}/newborn_t1_t2_count.csv",
         f"- {session_dir}/subs_only_one_t1_t2_TOTAL.xlsx",
+        f"- {session_dir}/vuPhyslog/**"
     ]
 
     with filter_file.open("w") as file:

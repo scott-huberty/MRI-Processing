@@ -11,7 +11,10 @@ def main(
     anat_only=False,
     bids_only=False,
     ip_address=None,
-    username=None
+    username=None,
+    dry_run=False,
+    spatial_file=None,
+    verbose=None,
     ):
     # get the subject id, session id, and project name
     prepare_subject_files(
