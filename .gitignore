@@ -10,6 +10,16 @@ ABC/MRI/newborn/derivatives/recon-all/*
 !ABC/MRI/newborn/derivatives/recon-all/
 !ABC/MRI/newborn/derivatives/recon-all/.gitkeep
 
+ABC/MRI/newborn/derivatives/Nibabies/*
+!ABC/MRI/newborn/derivatives/Nibabies/.gitkeep
+!ABC/MRI/newborn/derivatives/Nibabies/
+
+ABC/MRI/newborn/derivatives/work/nibabies_work/*
+!ABC/MRI/newborn/derivatives/work/nibabies_work/
+!ABC/MRI/newborn/derivatives/work/nibabies_work/.gitkeep
+
+ABC/MRI/newborn/.bidsignore
+
 BABIES/MRI/newborn/bids/*
 !BABIES/MRI/newborn/bids/
 !BABIES/MRI/newborn/bids/dataset_description.json
@@ -34,6 +44,9 @@ BABIES/MRI/newborn/derivatives/work/nibabies_work/*
 
 BABIES/MRI/*.txt
 BABIES/MRI/newborn/derivatives/Nibabies/*
+!BABIES/MRI/newborn/derivatives/Nibabies/.gitkeep
+!BABIES/MRI/newborn/derivatives/Nibabies/
+
 BABIES/MRI/newborn/SW_ROI
 BABIES/MRI/newborn/.bidsignore
 
