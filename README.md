@@ -36,7 +36,7 @@ cd ~/MRI_Processing`
 The command below will do the following:
 
 - pull the necessary files for sub-1073_ses-newborn from the server.
-- Create the precomputed files from the nifti files inside the derivatives/recon-all directory.
+- Create the precomputed files from the nifti files inside the derivatives directory.
 - run Nibabies
 - Push nibabies derivatives back to the server
 - Delete the local files that were used
@@ -62,7 +62,7 @@ ipython --pdb -- 00_process_subjects.py --project "BABIES" --subjects "1073" "13
 > [!NOTE]
 > - Our scripts pull the files into the `project/MRI/session/bids`, and `project/MRI/session/derivatvies/recon-all` directories.
 > - precompute files are generated locally and saved to `project/MRI/session/derivatives/precomputed`
-> - Nibabies will save the derivatives files to `project/MRI/session/derivatives/Nibabies` directory.
+> - Nibabies will save the derivatives files to `project/MRI/session/derivatives/Nibabies` directory, and `Nibabies/sourcedata/freesurfer/sub-xxxx` will also be copied to `project/MRI/session/derivatives/recon-all/sub-xxxx`.
 > - intermittent files are saved by Nibabies to `project/MRI/session/derivatives/work/nibabies_work`
 
 ## Running the Pipeline on the ACCRE Cluster.
