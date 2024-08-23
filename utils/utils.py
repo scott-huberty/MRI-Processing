@@ -239,9 +239,9 @@ def do_rsync(
     verbose="INFO",
 ):
     """Use rsync to copy files from one directory to another."""
+    assert Path(input_dir).exists(), f"{input_dir} does not exist"
     if server_is_mounted:
-        assert Path(input_dir).exists(), f"{input_dir} does not exist"
-    assert output_dir.exists(), f"{output_dir} does not exist"
+        assert output_dir.exists(), f"{output_dir} does not exist"
     flags = flags
     if verbose == "INFO":
         flags += "v"

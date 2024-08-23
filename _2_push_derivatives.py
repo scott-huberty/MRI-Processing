@@ -84,10 +84,21 @@ def rsync_to_server(**kwargs):
     if surface_recon_method == "mcribs":
         paths.append(mcribs_path)
         server_paths.append(server_mcribs)
+    
+    if not server_is_mounted:
+        for ii, path in enumerate(server_paths):
+            server_paths[ii] = Path(f"{username}@{ip_address}:{server_paths[ii]}")
+
+    assert len(paths) == len(server_paths)
     for path, server_path in zip(paths, server_paths):
         if path.exists():
             print(f"Pushing {path} to {server_path}")
-            do_rsync(path, server_path, flags="-rltv")
+            do_rsync(
+                path,
+                server_path,
+                flags="-rltv",
+                server_is_mounted=server_is_mounted
+                )
         else:
             print(f"{path} does not exist. Skipping.")
 
