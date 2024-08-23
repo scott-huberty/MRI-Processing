@@ -83,13 +83,14 @@ def pull_subject_files(
     project,
     subject_id,
     session,
-    output_dir,
     *,
-    dry_run=False,
+    output_dir,
     anat_only=False,
+    bids_only=False,
     pull_dwi=False,
     ip_address=None,
     username=None,
+    dry_run=False,
     verbose="INFO",
 ):
     """use rsync to pull the bids directory from 1 subject for a project like BABIES.
@@ -111,6 +112,10 @@ def pull_subject_files(
         committing to the result. Default is False.
     pull_dwi : bool
         If True, the function will pull the bids dwi directory. Default is False.
+    anat_only : bool
+        If True, the function will only pull the anatomical data. Default is False.
+    bids_only : bool
+        If True, the function will only pull the bids data. Default is False.
     ip_address : str
         The IP address of the whale computer, for example format "XX.X.XXX.XXX".
         Default is None, which assumes that the HumphreysLab server is mounted on
@@ -204,7 +209,12 @@ def pull_subject_files(
     # copy the entire subject directory
     filter_dwi = not pull_dwi
     filter_fpath = create_filter_file(
-        output_dir, subject_id, session, anat_only=anat_only, filter_dwi=filter_dwi
+        output_dir,
+        subject_id=subject_id,
+        session_dir=session,
+        anat_only=anat_only,
+        bids_only=bids_only,
+        filter_dwi=filter_dwi
     )
     rsync_input = f"{str(input_dir.parent.parent)}/./{project}/MRI/{session}"
     if ip_address is not None:
@@ -391,7 +401,13 @@ def create_precomputed_files(
 
 
 def create_filter_file(
-    fpath, subject_id, session_dir, anat_only=False, filter_dwi=True
+    fpath,
+    *,
+    subject_id,
+    session_dir,
+    anat_only=False,
+    bids_only=False,
+    filter_dwi=True
 ):
     """Create a filter file for a subject.
 
@@ -403,12 +419,21 @@ def create_filter_file(
         The session directory, for example "newborn" "six_month", or "sixmonth".
     filter_dwi : bool
         If True, the filter file will include the dwi directory. Default is True.
+    anat_only : bool
+        If True, the filter file will only include the anatomical datatype directories.
+        functional and fmap directories will be marked for exclusion. Default is False.
+    bids_only : bool
+        If True, the filter file will only include the bids data, and will mark any
+        derivatives sub directories (recon-all) for exclusion.
+        Default is False.
     """
     filter_file = Path(fpath)
     filter_file = filter_file / f"{subject_id}_filter.txt"
     session_bids = "sixmonth" if session_dir == "six_month" else session_dir
     filter_func = "-" if anat_only else "+"
     filter_dwi = "-" if filter_dwi else "+"
+    filter_derivatives = "-" if bids_only else "+"
+
     file_contents = [
         f"+ {session_dir}/bids/",
         f"+ {session_dir}/bids/sub-{subject_id}/",
@@ -421,8 +446,8 @@ def create_filter_file(
         f"{filter_func} {session_dir}/bids/sub-{subject_id}/ses-{session_bids}/fmap/***",
         f"- {session_dir}/bids/sub-{subject_id}/ses-{session_bids}/**",
         f"+ {session_dir}/derivatives/",
-        f"+ {session_dir}/derivatives/recon-all/",
-        f"+ {session_dir}/derivatives/recon-all/sub-{subject_id}/***",
+        f"{filter_derivatives} {session_dir}/derivatives/recon-all/",
+        f"{filter_derivatives} {session_dir}/derivatives/recon-all/sub-{subject_id}/***",
         f"- {session_dir}/bids/*",
         f"- {session_dir}/derivatives/**",
         f"- {session_dir}/bids_dwi/**",
@@ -432,11 +457,13 @@ def create_filter_file(
         f"- {session_dir}/trash/**",
         f"- {session_dir}/sourcedata/**",
         f"- {session_dir}/data_share/**",
+        f"- {session_dir}/Test Scan/**",
         f"- {session_dir}/.DS_Store",
         f"- {session_dir}/CABINET_Processing_IDs.xlsx",
         f"- {session_dir}/dataset_description.json",
         f"- {session_dir}/newborn_t1_t2_count.csv",
         f"- {session_dir}/subs_only_one_t1_t2_TOTAL.xlsx",
+        f"- {session_dir}/vuPhyslog/**"
     ]
 
     with filter_file.open("w") as file:

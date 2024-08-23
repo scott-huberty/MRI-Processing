@@ -20,13 +20,14 @@ get_age_in_months() {
 }
 
 # Check for correct number of arguments
-if [ "$#" -ne 4 ]; then
-    echo "run_nibabies.sh expects 4 arguments but you passed $#"
-    echo "Usage: $0 <PROJECT> <PARTICIPANT_LABEL> <AGE_DESCRIPTION> <SURFACE_RECON_METHOD>"
+if [ "$#" -lt 4 ] || [ "$#" -gt 5 ]; then
+    echo "run_nibabies.sh expects 4 positional arguments, and 1 additinal argument can be added. You passed $#"
+    echo "Usage: $0 <PROJECT> <PARTICIPANT_LABEL> <AGE_DESCRIPTION> <SURFACE_RECON_METHOD> <ANAT_ONLY>"
     echo "PROJECT can be: ABC, BABIES. Got $1"
     echo "PARTICIPANT_LABEL can be 1462, for example. Got $2"
     echo "AGE_DESCRIPTION can be: newborn, sixmonth, twelvemonth. Got $3"
     echo "SURFACE_RECON_METHOD must be: infantfs or mcribs. Got $4"
+    echo "ANAT_Only is option and can be included by passing --anat-only. Got $5"
     exit 1
 fi
 
@@ -39,6 +40,12 @@ SURFACE_RECON_METHOD=$4
 
 # Convert age description to months
 AGE_MONTHS=$(get_age_in_months $AGE_DESCRIPTION)
+
+# Check if --anat-only flag is passed
+ANAT_ONLY_FLAG=""
+if [ "$#" -eq 5 ] && [ "$5" == "--anat-only" ]; then
+    ANAT_ONLY_FLAG="--anat-only"
+fi
 
 
 # Validate project
@@ -64,6 +71,19 @@ SCRATCH_DIR="$DERIVATIVES_DIR/work/nibabies_work"
 PRECOMPUTED_DIR="$DERIVATIVES_DIR/precomputed"
 LICENSE_FILE="$ROOT_DIR/utils/assets/license.txt"
 
+echo "Passing these parameters to singularity"
+echo "---------------------------------------"
+echo " BIDS: $BIDS_DIR"
+echo " OUT: $OUT_DIR"
+echo " SCRATCH: $SCRATCH_DIR"
+echo " LICENSE: $LICENSE_FILE"
+echo " PRECOMPUTED ASEG: $PRECOMPUTED_DIR"
+echo " AGE MONTHS: $AGE_MONTHS"
+echo " PARTICIPANT: $PARTICIPANT_LABEL"
+echo " METHOD: $SURFACE_RECON_METHOD"
+echo " ANAT_ONLY: $ANAT_ONLY_FLAG"
+echo " IMAGE: $IMAGE"
+echo "----------------------------------------"
 # XXX: add arguments for anat_only, CIFTI output?
 # Execute the Singularity command
 singularity run -e \
@@ -80,4 +100,4 @@ singularity run -e \
   -w /scratch \
   --surface-recon-method ${SURFACE_RECON_METHOD} \
   --cifti-output 91k \
-  --verbose
+  --verbose ${ANAT_ONLY_FLAG}
