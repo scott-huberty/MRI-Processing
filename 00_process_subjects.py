@@ -158,21 +158,33 @@ def main(**kwargs):
     username = kwargs.get("username", None)
 
     assert isinstance(anat_only, bool), "anat_only must be a boolean."
+    subject_success_file = Path(f"./logs/{project}_subject_success.txt")
     for subject in subjects:
         # sys.stdout = open(f'./sub-{subject}_ses-{session}_processing.log', 'w')
-        print(f"\nProcessing")
-        process_one_subject(
-            project=project,
-            subject=subject,
-            session=session,
-            surface_recon_method=surface_recon_method,
-            anat_only=anat_only,
-            version=version,
-            use_dev=use_dev,
-            nibabies_path=nibabies_path,
-            ip_address=ip_address,
-            username=username,
-        )
+        print(f"\nProcessing {subject}")
+        with subject_success_file.open("a") as f:
+            f.write(f"\n ####{subject} #### \n")
+        try:
+            process_one_subject(
+                project=project,
+                subject=subject,
+                session=session,
+                surface_recon_method=surface_recon_method,
+                anat_only=anat_only,
+                version=version,
+                use_dev=use_dev,
+                nibabies_path=nibabies_path,
+                ip_address=ip_address,
+                username=username,
+            )
+        except Exception as e:
+            mgs = f"❌ Error processing subject {subject}: {e}"
+            print(mgs)
+            with subject_success_file.open("a") as f:
+                f.write(mgs)
+            continue
+        with subject_success_file.open("a") as f:
+            f.write(f"✅ {subject} Completed \n")
 
 
 def run_main():
