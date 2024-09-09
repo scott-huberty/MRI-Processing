@@ -1,8 +1,10 @@
 import argparse
 from pathlib import Path
+from warnings import warn
 
 from utils.config import SubjectConfig
 from utils.utils import do_rsync
+
 
 
 def rsync_to_server(**kwargs):
@@ -37,9 +39,15 @@ def rsync_to_server(**kwargs):
     assert nibabies_path == (derivatives_path / "Nibabies" / f"sub-{subject}").resolve()
     server_nibabies = config.server_paths["nibabies"]
 
-    sourcedata_path = (config.local_paths["nibabies"] / "sourcedata" / f"{surface_recon_method}" / f"sub-{subject}")  # fmt:skip
-    assert sourcedata_path.exists()
-    assert (sourcedata_path == derivatives_path / "Nibabies" / "sourcedata" / f"{surface_recon_method}" / f"sub-{subject}")  # fmt:skip
+    sourcedata_base = (config.local_paths["nibabies"] / "sourcedata" / f"{surface_recon_method}")
+    sourcedata_subject_dir = Path(f"sub-{subject}")
+    sourcedata_path = sourcedata_base / sourcedata_subject_dir
+    if not sourcedata_path.exists():
+        warn(f"{sourcedata_path} does not exist. Checking if the folder in sourcedata instead follows the sub-XXX_ses-XXX pattern.")
+    sourcedata_subject_dir = sourcedata_subject_dir.with_name(f"{sourcedata_subject_dir}_ses-{session}")
+    sourcedata_path = sourcedata_base / sourcedata_subject_dir
+    if not sourcedata_path.exists():
+        raise FileNotFoundError(f"File for sub-{subject}_ses-{session} does not exist in {sourcedata_base}")
     server_sourcedata = server_nibabies / "sourcedata"  # / f"{surface_recon_method}"
 
     html_path = derivatives_path / "Nibabies" / f"sub-{subject}_ses-{session}.html"
@@ -50,7 +58,8 @@ def rsync_to_server(**kwargs):
     assert (precomputed_path == (derivatives_path / "precomputed" / f"sub-{subject}").resolve())  # fmt:skip
     server_precomputed = config.server_paths["precomputed"]
 
-    freesurfer_path = (nibabies_path.parent / "sourcedata" / "freesurfer" / f"sub-{subject}")  # fmt:skip
+    freesurfer_base = (nibabies_path.parent / "sourcedata" / "freesurfer")
+    freesurfer_path = freesurfer_base / sourcedata_subject_dir
     server_freesurfer = server_nibabies / "sourcedata" / "freesurfer"
     if not freesurfer_path.exists():
         msg = f"{freesurfer_path} does not exist."
@@ -58,10 +67,11 @@ def rsync_to_server(**kwargs):
             msg += "MCRIBS may have failed. Please check the logs."
         raise FileNotFoundError(msg)
     if surface_recon_method == "mcribs":
-        mcribs_path = nibabies_path.parent / "sourcedata" / "mcribs" / f"sub-{subject}"
+        mcribs_path = nibabies_path.parent / "sourcedata" / "mcribs" / sourcedata_subject_dir
         server_mcribs = server_sourcedata / "mcribs"
         assert mcribs_path.exists()
-        assert server_mcribs.exists(), f"{server_mcribs} directory does not exist."
+        if server_is_mounted:
+            assert server_mcribs.exists(), f"{server_mcribs} directory does not exist."
 
     server_reconall = config.server_paths["reconall"]
     if server_is_mounted:
