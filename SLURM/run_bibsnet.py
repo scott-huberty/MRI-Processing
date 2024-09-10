@@ -91,7 +91,7 @@ def main(
         image_path,
         "/input",
         "/output",
-        participant_label,
+        subject,
         ]
     )
 
