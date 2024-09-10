@@ -33,4 +33,4 @@ fi
 
 echo "Running ${SLURM_JOB_NAME}: $PROJECT sub-${PARTICIPANT_LABEL}_ses-$AGE_DESCRIPTION using $SURFACE_RECON_METHOD $ANAT_ONLY"
 
-python3 ./_1_run_nibabies.py --project $PROJECT --participant_label $PARTICIPANT_LABEL --age_description $AGE_DESCRIPTION --surface_recon_method $SURFACE_RECON_METHOD $ANAT_ONLY --container-type "singularity"
+python3 ./_1_run_nibabies.py --project $PROJECT --subject $PARTICIPANT_LABEL --session $AGE_DESCRIPTION --surface-recon-method $SURFACE_RECON_METHOD --container-type "singularity" $ANAT_ONLY
