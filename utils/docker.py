@@ -175,7 +175,7 @@ def build_args(
     # Nibabies arguments
     if container_type == "singularity":
         command.extend([
-            image_path,
+            str(image_path),
             ])
     elif container_type == "docker":
         command.extend([
