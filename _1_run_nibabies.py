@@ -17,14 +17,6 @@ def main(
     nibabies_path=None,
 ):
     # get the subject id, session id, and project name
-    subject = kwargs["subject"]
-    session = kwargs["session"]
-    project = kwargs["project"]
-    surface_recon_method = kwargs["surface_recon_method"]
-    version = kwargs["version"]
-    use_dev = kwargs.get("use_dev", False)
-    nibabies_path = kwargs.get("nibabies_path", None)
-    anat_only = kwargs.get("anat_only", False)
 
     session_dir = "six_month" if session == "sixmonth" and project == "BABIES" else session
     surface_recon_method = "infantfs" if surface_recon_method == "freesurfer" else surface_recon_method
