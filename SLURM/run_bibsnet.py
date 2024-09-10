@@ -40,11 +40,11 @@ def parse_args():
 
 
 def main(
-    project: str,
+    project,
     *,
-    subject: str,
-    session: str,
-    image_path: str = None,
+    subject,
+    session,
+    image_path=None,
     ):
     """Run BIBSnet on a single subject.
     
