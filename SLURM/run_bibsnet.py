@@ -59,7 +59,7 @@ def main(
     image_path : str, optional
         Absolute path to the BIBSnet image. If ``None`` is provided (default), Then function will use the image stored on The Humphreys Lab DORS server: ``/gpfs51/dors2/l3_humphreys_lab/dev/images/bibsnet_fork.sil``.
     """
-    dors_image_path = Path("/gpfs51/dors2/l3_humphreys_lab/dev/images/bibsnet_fork.sil")
+    dors_image_path = Path("/gpfs51/dors2/l3_humphreys_lab/dev/images/bibsnet_fork.sif")
     image_path = Path(image_path) if image_path is not None else dors_image_path
     if not isinstance(image_path, Path):
         raise TypeError(f"image_path must be a string or a Path object, got {type(image_path)} instead.")
