@@ -501,6 +501,7 @@ def get_age_in_months(age_description):
     age_map = {
         "newborn": "1",
         "sixmonth": "6",
+        "six_month": "6",
         "twelvemonth": "12"
     }
     age = age_description.lower()
@@ -509,3 +510,10 @@ def get_age_in_months(age_description):
             f"age_description must be one of {list(age_map.keys())}, but got: {age_description}"
         )
     return age_map[age]
+
+
+def get_session_dir_from_session(session):
+    if session == "sixmonth":
+        return "six_month"
+    else:
+        return session
