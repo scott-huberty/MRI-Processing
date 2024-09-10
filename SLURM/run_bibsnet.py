@@ -69,8 +69,8 @@ def main(
     # Define paths
     session_dir = "six_month" if (session == "sixmonth" and project == "BABIES") else session
     pwd = Path(__file__).parent
-    bids_path = pwd.parent / project / session_dir / "bids"
-    derivatives_path = pwd.parent / project / session_dir / "derivatives"
+    bids_path = (pwd.parent / project / session_dir / "bids").absolute()
+    derivatives_path = (pwd.parent / project / session_dir / "derivatives").absolute()
     if not bids_path.exists():
         raise FileNotFoundError(f"BIDS directory not found: {bids_path}")
     if not derivatives_path.exists():
