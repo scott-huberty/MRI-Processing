@@ -8,11 +8,13 @@
 #SBATCH --ntasks=4
 #SBATCH --mem=50G
 #SBATCH --time=1:00:00
+#SBATCH --output=./log/%j.out
+
 
 # get the directory of the script
 if ["$#" -ne 3]; then
     echo "Usage: $0 <project> <subject> <session>"
-    echo "Project: Can be "BABIES" or "ABC". Got $0."
+    echo "Project: Can be 'BABIES' or 'ABC'. Got $0."
     echo "subject: For example 1461. Got $1."
     echo "session: must be 'newborn', 'sixmonth' or 'twelvemonth'. Got $2."
 
