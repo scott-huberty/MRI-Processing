@@ -3,6 +3,7 @@
 These scripts facilitate processing MRI files from the SEAlab BABIES and ABC studies, through the Nibabies Pipeline.
 
 ## Quick Links
+- [Running BIBSnet](#Running-BIBSnet)
 - [Running on WHALE](#Running-from-the-Whale-Computer)
 
 - [Running on ACCRE](#Running-the-Pipeline-on-the-ACCRE-Cluster)
@@ -10,6 +11,17 @@ These scripts facilitate processing MRI files from the SEAlab BABIES and ABC stu
   - [submitting a SLURM job](#Submit-a-SLURM-job-to-process-these-files-with-Nibabies)
 
   - [Inspecting the status or success of a job](#Inspecting-the-log-files-for-a-job/Nibabies-run)
+
+## Running BIBSnet
+
+BIBSnet must be run on the ACCRE cluster. You must be in the `MRI-Processing/SLURM` directory, which is where the scripts to initiate the job are located. Here is an example command to run BABIES participant `sub-1011_ses-sixmonth` through BIBSnet.
+
+```bash
+
+sbatch submit_bibsnet_job.sbatch "BABIES" "1011" "sixmonth"
+```
+
+In this case, the output would be written to ``MRI-Processing/BABIES/MRI/six_month/sub-1011``.
 
 ## Running from the Whale Computer
 
