@@ -70,8 +70,8 @@ def main(
     session_dir = "six_month" if (session == "sixmonth" and project == "BABIES") else session
     slurm_dir = Path(__file__).parent.absolute()
     mri_processing_dir = slurm_dir.parent
-    bids_path = (mri_processing_dir / project / session_dir / "bids").absolute()
-    derivatives_path = (mri_processing_dir / project / session_dir / "derivatives").absolute()
+    bids_path = (mri_processing_dir / project / "MRI" / session_dir / "bids").absolute()
+    derivatives_path = (mri_processing_dir / project / "MRI" / session_dir / "derivatives").absolute()
     if not bids_path.exists():
         raise FileNotFoundError(f"BIDS directory not found: {bids_path}")
     if not derivatives_path.exists():
