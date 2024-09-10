@@ -1,29 +1,32 @@
 import argparse
 import subprocess
+from pathlib import Path
 
 
 def parse_args():
     parser = argparse.ArgumentParser(description='Run BiBS-Net')
     parser.add_argument(
-        "--bids_path",
+        "--project",
         type=str,
-        dest="bids_path",
-        help="Absolute path to the BIDS directory",
+        dest="project",
+        choices=["BABIES", "ABC"],
+        help="Project name. Must be one 'BABIES', or 'ABC'",
         required=True,
     )
     parser.add_argument(
-        "--derivatives-fpath",
+        "--subject",
         type=str,
-        dest="derivatives_path",
-        help="Absolute path to the derivatives/BIBsnet directory. This is where the output of BIBSnet will be stored.",
-        required=True,
-    )
-    parser.add_argument(
-        "--participant-label",
-        type=str,
-        dest="participant_label",
+        dest="subject",
         help="The label of the participant that should be analyzed, for example 1011 for sub-1011. The label corresponds to sub-<participant_label> from the BIDS spec (so it does not include 'sub-')",
         required=True,
+    )
+    parser.add_argument(
+        "--session",
+        type=str,
+        dest="session",
+        required=True,
+        choices=["newborn", "sixmonth", "twelvemonth"],
+        help="Must be 'newborn', 'sixmonth', or 'twelvemonth'."
     )
     parser.add_argument(
         "--image_path",
@@ -35,23 +38,24 @@ def parse_args():
     args = parser.parse_args()
     return vars(args)
 
+
 def main(
-    bids_path: str,
+    project: str,
     *,
-    derivatives_path: str,
-    participant_label: str,
+    subject: str,
+    session: str,
     image_path: str = None,
     ):
     """Run BIBSnet on a single subject.
     
     Parameters
     ----------
-    bids_path : str
-        Absolute path to the BIDS directory
-    derivatives_path : str
-        Absolute path to the derivatives/BIBsnet directory. This is where the output of BIBSnet will be stored.
-    participant_label : str
+    project : str
+        Project name. Must be one 'BABIES', or 'ABC'.
+    subject : str
         The label of the participant that should be analyzed, for example 1011 for sub-1011.
+    session : str
+        The session of the participant that should be analyzed, for example 'newborn', 'sixmonth', or 'twelvemonth'.
     image_path : str, optional
         Absolute path to the BIBSnet image. If ``None`` is provided (default), Then function will use the image stored on The Humphreys Lab DORS server: ``/gpfs51/dors2/l3_humphreys_lab/dev/images/bibsnet_fork.sil``.
     """
@@ -61,6 +65,16 @@ def main(
         raise TypeError(f"image_path must be a string or a Path object, got {type(image_path)} instead.")
     if not image_path.exists():
         raise FileNotFoundError(f"Image file not found: {image_path}")
+
+    # Define paths
+    session_dir = "six_month" if (session == "sixmonth" and project == "BABIES") else session
+    pwd = Path(__file__).parent
+    bids_path = pwd.parent / project / session_dir / "bids"
+    derivatives_path = pwd.parent / project / session_dir / "derivatives"
+    if not bids_path.exists():
+        raise FileNotFoundError(f"BIDS directory not found: {bids_path}")
+    if not derivatives_path.exists():
+        raise FileNotFoundError(f"Derivatives directory not found: {derivatives_path}")
     # Run BIBSnet
     subprocess.call(
         [
