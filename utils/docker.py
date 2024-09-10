@@ -121,14 +121,14 @@ def build_args(
     verbose : bool, optional
         If true, run Nibabies in Verbose mode, to print more information. Default is False.
     """
-    from utils import get_age_in_months
+    from .utils import get_age_in_months
 
     # Define paths
     root = Path(__file__).absolute().parent.parent
     bids_dir = Path(f"{root}/{project}/MRI/{session}/bids").resolve()
     derivatives_dir = Path(f"{root}/{project}/MRI/{session}/derivatives/Nibabies").resolve()
     precomputed_dir = Path(f"{root}/{project}/MRI/{session}/derivatives/precomputed").resolve()
-    freesurfer_license = Path("./assets/license.txt").resolve()
+    freesurfer_license = Path(f"{root}/utils/assets/license.txt").resolve()
     if container_type == "singularity":
         work_dir = Path("/gpfs51/dors2/l3_humphreys_lab/nibabies_work").resolve()
     else:
