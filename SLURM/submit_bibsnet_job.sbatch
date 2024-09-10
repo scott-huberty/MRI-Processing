@@ -20,4 +20,10 @@ if [ "$#" -ne 3 ]; then
     exit 1
 fi
 
-python ./run_bibsnet.py --project $1 --subject $2 --session $3
+PROJECT=$1
+SUBJECT=$2
+SESSION=$3
+
+echo "Running BibsNet for $PROJECT $SUBJECT $SESSION"
+
+python ./run_bibsnet.py --project $PROJECT --subject $SUBJECT --session $SESSION
