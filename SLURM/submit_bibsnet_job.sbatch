@@ -17,5 +17,6 @@ if ["$#" -ne 3]; then
     echo "Project: Can be 'BABIES' or 'ABC'. Got $0."
     echo "subject: For example 1461. Got $1."
     echo "session: must be 'newborn', 'sixmonth' or 'twelvemonth'. Got $2."
+fi
 
 python ./run_bibsnet.py $1 $2 $3
