@@ -131,7 +131,7 @@ def build_args(
     freesurfer_license = Path(f"{root}/utils/assets/license.txt").resolve()
     if container_type == "singularity":
         work_dir = Path("/gpfs51/dors2/l3_humphreys_lab/nibabies_work").resolve()
-        image_path = Path("/gpfs51/dors2/l3_humphreys_lab/dev/images").resolve()
+        image_path = Path("/gpfs51/dors2/l3_humphreys_lab/dev/images/nibabies_latest.sif").resolve()
     else:
         work_dir = Path(f"{root}/{project}/MRI/{session}/derivatives/work/nibabies_work").resolve()
 
