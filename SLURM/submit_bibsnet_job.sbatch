@@ -12,11 +12,12 @@
 
 
 # get the directory of the script
-if ["$#" -ne 3]; then
+if [ "$#" -ne 3 ]; then
     echo "Usage: $0 <project> <subject> <session>"
-    echo "Project: Can be 'BABIES' or 'ABC'. Got $0."
-    echo "subject: For example 1461. Got $1."
-    echo "session: must be 'newborn', 'sixmonth' or 'twelvemonth'. Got $2."
+    echo "Project: Can be 'BABIES' or 'ABC'. Got $1."
+    echo "subject: For example 1461. Got $2."
+    echo "session: must be 'newborn', 'sixmonth' or 'twelvemonth'. Got $3."
+    exit 1
 fi
 
 python ./run_bibsnet.py --project $1 --subject $2 --session $3
