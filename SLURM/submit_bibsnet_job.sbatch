@@ -16,4 +16,4 @@ if ["$#" -ne 3]; then
     echo "subject: For example 1461. Got $1."
     echo "session: must be 'newborn', 'sixmonth' or 'twelvemonth'. Got $2."
 
-python ./run_bibsnet.py
+python ./run_bibsnet.py $1 $2 $3
