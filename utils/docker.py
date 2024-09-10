@@ -131,6 +131,7 @@ def build_args(
     freesurfer_license = Path(f"{root}/utils/assets/license.txt").resolve()
     if container_type == "singularity":
         work_dir = Path("/gpfs51/dors2/l3_humphreys_lab/nibabies_work").resolve()
+        image_path = Path("/gpfs51/dors2/l3_humphreys_lab/dev/images").resolve()
     else:
         work_dir = Path(f"{root}/{project}/MRI/{session}/derivatives/work/nibabies_work").resolve()
 
@@ -143,7 +144,9 @@ def build_args(
         raise FileNotFoundError(f"Work directory not found: {work_dir}")
     if not freesurfer_license.exists():
         raise FileNotFoundError(f"FreeSurfer license file not found: {freesurfer_license}")
-    
+    if container_type == "singularity" and not image_path.exists():
+            raise FileNotFoundError(f"Image file not found: {image_path}")
+
     age_months = get_age_in_months(session)
 
     # define container specific arguments
@@ -170,8 +173,15 @@ def build_args(
     if use_dev:
         raise NotImplementedError("use_dev is not yet implemented.")
     # Nibabies arguments
+    if container_type == "singularity":
+        command.extend([
+            image_path,
+            ])
+    elif container_type == "docker":
+        command.extend([
+            f"nipreps/nibabies:{version}",
+            ]),
     command.extend([
-        f"nipreps/nibabies:{version}",
         "/data",
         "/out",
         "participant",
