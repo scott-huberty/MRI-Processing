@@ -495,3 +495,17 @@ def rename_t1w_files(anat_path):
         print(f"Renamed {t1w} to {new_name}")
         new_names.append(new_name)
     return new_names
+
+
+def get_age_in_months(age_description):
+    age_map = {
+        "newborn": "1",
+        "sixmonth": "6",
+        "twelvemonth": "12"
+    }
+    age = age_description.lower()
+    if age not in age_map:
+        raise ValueError(
+            f"age_description must be one of {list(age_map.keys())}, but got: {age_description}"
+        )
+    return age_map[age]
