@@ -41,7 +41,6 @@ def parse_args():
 
 def main(
     project,
-    *,
     subject,
     session,
     image_path=None,
