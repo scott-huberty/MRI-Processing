@@ -33,16 +33,4 @@ fi
 
 echo "Running ${SLURM_JOB_NAME}: $PROJECT sub-${PARTICIPANT_LABEL}_ses-$AGE_DESCRIPTION using $SURFACE_RECON_METHOD $ANAT_ONLY"
 
-# Check for correct number of arguments
-if [ "$#" -lt 4 ] || [ "$#" -gt 5 ]; then
-    echo "run_nibabies.sh expects 4 positional arguments, and 1 additinal argument can be added. You passed $#"
-    echo "Usage: $0 <PROJECT> <PARTICIPANT_LABEL> <AGE_DESCRIPTION> <SURFACE_RECON_METHOD> <ANAT_ONLY>"
-    echo "PROJECT can be: ABC, BABIES. Got $1"
-    echo "PARTICIPANT_LABEL can be 1462, for example. Got $2"
-    echo "AGE_DESCRIPTION can be: newborn, sixmonth, twelvemonth. Got $3"
-    echo "SURFACE_RECON_METHOD must be: infantfs or mcribs. Got $4"
-    echo "ANAT_ONLY is option and can be included by passing --anat-only. Got $5"
-    exit 1
-fi
-
 ./_1_run_nibabies.py --project $PROJECT --participant_label $PARTICIPANT_LABEL --age_description $AGE_DESCRIPTION --surface_recon_method $SURFACE_RECON_METHOD $ANAT_ONLY --container-type "singularity"
