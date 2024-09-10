@@ -28,6 +28,7 @@ def main(
         surface_recon_method=surface_recon_method,
         anat_only=anat_only,
         surface_outputs=surface_outputs,
+        container_type=container_type,
         version=version,
         use_dev=use_dev,
         nibabies_path=nibabies_path,
