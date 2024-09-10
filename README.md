@@ -23,6 +23,9 @@ sbatch submit_bibsnet_job.sbatch "BABIES" "1011" "sixmonth"
 
 In this case, the output would be written to ``MRI-Processing/BABIES/MRI/six_month/sub-1011``.
 
+
+> [!NOTE]
+> - Make sure you have your virtual environment activated! Otherwise the script may try to call python version 2 instead of 3
 ## Running from the Whale Computer
 
 - This repository is already cloned on the Whale Computer at `/Users/sealab/MRI_Processing`.

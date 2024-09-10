@@ -26,4 +26,4 @@ SESSION=$3
 
 echo "Running BibsNet for $PROJECT $SUBJECT $SESSION"
 
-python ./run_bibsnet.py --project $PROJECT --subject $SUBJECT --session $SESSION
+python3 ./run_bibsnet.py --project $PROJECT --subject $SUBJECT --session $SESSION
