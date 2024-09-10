@@ -152,7 +152,7 @@ def build_args(
     # define container specific arguments
     bind = "--bind" if container_type == "singularity" else "--volume"
     container = "singularity" if container_type == "singularity" else "docker"
-    singularity_args = ["--cleanenv", "--no-home","--nv"]
+    singularity_args = ["--cleanenv"]
     docker_args = ["-it"]
     # Build command
     command = [
