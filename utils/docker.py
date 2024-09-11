@@ -190,6 +190,8 @@ def build_args(
         "--derivatives", "/opt/derivatives/precomputed",
         "-w", "/scratch",
         "--surface-recon-method", surface_recon_method,
+        "--nprocs", "12",
+        "--mem", "3000",
         ])
     if anat_only:
         command.extend([
