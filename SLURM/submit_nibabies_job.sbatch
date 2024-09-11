@@ -1,5 +1,4 @@
 #!/bin/bash
-#SBATCH --account=
 #SBATCH --mail-user=scott.huberty@vanderbilt.edu
 #SBATCH --mail-type=ALL
 #SBATCH --nodes=1
