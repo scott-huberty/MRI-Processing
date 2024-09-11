@@ -1,10 +1,11 @@
 #!/bin/bash
+#SBATCH --account=
 #SBATCH --mail-user=scott.huberty@vanderbilt.edu
 #SBATCH --mail-type=ALL
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=4
-#SBATCH --mem=20G
+#SBATCH --mem=32G
 #SBATCH --time=8:00:00
 #SBATCH --output=./SLURM/log/%j.out
 
@@ -16,7 +17,7 @@ if [ "$#" -lt 4 ] || [ "$#" -gt 5 ]; then
     echo "PARTICIPANT_LABEL can be 1462, for example. Got $2"
     echo "AGE_DESCRIPTION can be: newborn, sixmonth, twelvemonth. Got $3"
     echo "SURFACE_RECON_METHOD must be: infantfs or mcribs. Got $4"
-    echo "ANAT_Only is option and can be included by passing --anat-only. Got $5"
+    echo "ANAT_ONLY is option and can be included by passing --anat-only. Got $5"
     exit 1
 fi
 
@@ -33,4 +34,4 @@ fi
 
 echo "Running ${SLURM_JOB_NAME}: $PROJECT sub-${PARTICIPANT_LABEL}_ses-$AGE_DESCRIPTION using $SURFACE_RECON_METHOD $ANAT_ONLY"
 
-python3 ./_1_run_nibabies.py --project $PROJECT --subject $PARTICIPANT_LABEL --session $AGE_DESCRIPTION --surface-recon-method $SURFACE_RECON_METHOD --container-type "singularity" $ANAT_ONLY
+python3 ../_1_run_nibabies.py --project $PROJECT --subject $PARTICIPANT_LABEL --session $AGE_DESCRIPTION --surface-recon-method $SURFACE_RECON_METHOD --container-type "singularity" $ANAT_ONLY
