@@ -132,8 +132,10 @@ ipython --pdb -- _0_pull_subject_files.py --project "BABIES" --subject "1462" --
 
 ### Submit a SLURM job to process these files with Nibabies
 
+Assuming that you are in the `MRI-Processing/SLURM` directory:
+
 ```bash
-sbatch nibabies.sbatch BABIES 1462 newborn infantfs
+sbatch submit_nibabies_job.sbatch BABIES 1462 newborn infantfs
 ```
 
 #### Check the status of your submitted job
