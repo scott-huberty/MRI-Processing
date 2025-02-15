@@ -4,26 +4,31 @@ from pathlib import Path
 from utils.docker import run_nibabies
 
 
-def main(**kwargs):
+def main(
+    project,
+    subject,
+    session,
+    surface_recon_method,
+    anat_only=False,
+    surface_outputs=True,
+    container_type="docker",
+    version="latest",
+    use_dev=False,
+    nibabies_path=None,
+):
     # get the subject id, session id, and project name
-    subject = kwargs["subject"]
-    session = kwargs["session"]
-    project = kwargs["project"]
-    surface_recon_method = kwargs["surface_recon_method"]
-    version = kwargs["version"]
-    use_dev = kwargs.get("use_dev", False)
-    nibabies_path = kwargs.get("nibabies_path", None)
-    anat_only = kwargs.get("anat_only", False)
 
     session_dir = "six_month" if session == "sixmonth" and project == "BABIES" else session
     surface_recon_method = "infantfs" if surface_recon_method == "freesurfer" else surface_recon_method
     
     run_nibabies(
+        project=project,
         subject=subject,
         session=session_dir,
-        project=project,
         surface_recon_method=surface_recon_method,
         anat_only=anat_only,
+        surface_outputs=surface_outputs,
+        container_type=container_type,
         version=version,
         use_dev=use_dev,
         nibabies_path=nibabies_path,
@@ -70,7 +75,20 @@ def parse_args():
         help="only process anatomical data"
         )
     parser.add_argument(
-        "--nibabies_version",
+        "--surface-outputs",
+        dest="surface_outputs",
+        choices=[True, False],
+        default=True,
+        help="output CIFTI files"
+        )
+    parser.add_argument(
+        "--container-type",
+        dest="container_type",
+        default="docker",
+        help="container type, must be 'docker' or 'singularity'. Default is docker."
+    )
+    parser.add_argument(
+        "--nibabies-version",
         type=str,
         dest="version",
         default="latest",
