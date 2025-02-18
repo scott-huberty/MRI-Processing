@@ -1,7 +1,6 @@
 import shutil
 import subprocess
 from pathlib import Path
-from typing import Literal, Union
 from warnings import warn
 
 from .config import Config
@@ -82,16 +81,16 @@ def rsync_to_server(project, subject, session, dry_run=False, verbose="INFO"):
 
 def download_bids_directory(
     project,
-    subject_id: Union[str, int],
-    session: Literal["newborn", "sixmonth"],
+    subject_id,
+    session,
     *,
     output_dir,
-    anat: Literal[True, False]=True,
-    func: Literal[True, False]=True,
-    dwi: Literal[True, False]=False,
-    dry_run: Literal[True, False]=False,
-    login_name: str=None,
-    host_name: str=None,
+    anat=True,
+    func=True,
+    dwi=False,
+    dry_run=False,
+    login_name=None,
+    host_name=None,
 ):
     """use rsync to download the bids directory from 1 subject for a project like BABIES.
 
@@ -249,15 +248,15 @@ def download_bids_directory(
     return output_dir / sub_entity
 
 def download_derivative_directory(
-    project: Literal["BABIES", "ABC"],
-    subject_id: Union[str, int],
-    session: Literal["newborn", "sixmonth"],
+    project,
+    subject_id,
+    session,
     *,
     derivative: str,
-    output_dir: Union[str, Path, None]=None,
-    dry_run: Literal[True, False]=False,
-    login_name: str=None,
-    host_name: str=None,
+    output_dir=None,
+    dry_run=False,
+    login_name=None,
+    host_name=None,
 ):
     """use rsync to download the precomputed directory from 1 subject for a project like BABIES.
 
