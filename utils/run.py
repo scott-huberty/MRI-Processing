@@ -1,10 +1,10 @@
 from .config import SubjectConfig
 from .utils import (
     create_filter_file,
-    create_precomputed_files,
     create_precomputed_jsons,
-    pull_subject_files,
-    rename_t1w_files,
+    create_precomputed_nifties,
+    download_bids_directory,
+    rename_coregistered_t1w_files,
 )
 
 
@@ -75,7 +75,7 @@ def prepare_subject_files(
     session = config["session"]
     p_root = "." if mri_processing_dir is None else mri_processing_dir
 
-    pull_subject_files(
+    download_bids_directory(
         project,
         subject_id,
         session,
@@ -90,12 +90,12 @@ def prepare_subject_files(
 
     config.get_spatial_file()
     config.check_paths(local=True, server=False, mode="error")
-    rename_t1w_files(config["local_paths"]["sub_anatpath"])
+    rename_coregistered_t1w_files(config["local_paths"]["sub_anatpath"])
 
     if bids_only:
         return
 
-    create_precomputed_files(
+    create_precomputed_nifties(
         reconall_dir=config["local_paths"]["reconall"],
         output_dir=config["local_paths"]["precomputed"],
         subject=config["subject_id"],
