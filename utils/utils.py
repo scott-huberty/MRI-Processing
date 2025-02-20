@@ -277,12 +277,15 @@ def download_derivative_directory(
             The derivative to copy. For example ``"precomputed"``, ``"recon-all"``,
             ``"bibsnet"``, or ``"recon-all_final"``.
         output_dir : path-like
-            The local output directory to copy to. For example,
-            ``"/Users/sealab/MRI_Processing/BABIES/newborn/derivatives/precomputed"``, or
-            ``"~/MRI_Processing/BABIES/newborn/derivatives/bibsnet"``, or
-            ``"~/MRI_Processing/BABIES/newborn/derivatives/recon-all"``.
+            The local output directory to copy to. For example:
+
+            - ``"/Users/sealab/MRI_Processing/BABIES/newborn/derivatives/precomputed"``, or
+            - ``"~/MRI_Processing/BABIES/newborn/derivatives/bibsnet"``, or
+            - ``"~/MRI_Processing/BABIES/newborn/derivatives/recon-all"``.
+            
             Can either be a relative or absolute path. Default is None, which will
-            use the current directory of the python interpreter is used.
+            use the current directory of the python interpreter is used. This path must
+            exist before running this function. If it doesnt, please create it first.
         dry_run : bool
             If True, the function will not copy any files, but will print the rsync command.
             Use this if you want to validate the behaviour of this function before
@@ -359,7 +362,9 @@ def download_derivative_directory(
         if not sub_dir.exists():
             raise FileNotFoundError(f"{sub_dir} does not exist")
     if not output_dir.exists():
-        raise FileNotFoundError(f"{output_dir} does not exist")
+        raise FileNotFoundError(
+            f"{output_dir} does not exist. If this path is correct but does not exist, please create it first."
+            )
     if not isinstance(subject_id, (str, int)):
         raise ValueError(
             f"subject_id must be a string or number, but got: {subject_id}\n"
@@ -646,7 +651,7 @@ def create_precomputed_nifties(
     space="T2w",
     overwrite=False,
 ):
-    """Copy recon-all files to precomputed directory and rename them.
+    """Copy a derived aseg and brain mask nifti file to the precomputed directory.
 
     Parameters
     ----------
