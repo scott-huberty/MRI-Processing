@@ -132,6 +132,16 @@ def download_bids_directory(
     output_dir : path-like
         The path to the local BIDS/subject directory that was copied from the server.
     
+    Notes
+    -----
+    .. important::
+        
+        - If you are not on the Whale computer, you must provide the login_name and host_name
+            parameters to connect to the server.
+        - Unlike the bids/subject directories on the server, this function will add a session
+            directory, e.g. ``"bids/sub-12001/ses-newborn"``. This is to be compliant with BIDS
+            and with Nibabies.
+    
     Examples
     --------
     >>> from utils.utils import download_bids_directory
@@ -217,31 +227,31 @@ def download_bids_directory(
     ##########################################################################
     # Make the output parent directory if it doesn't exist
     if not (output_dir / sub_entity).exists():
-        (output_dir / sub_entity).mkdir()
+        (output_dir / sub_entity / ses_entity).mkdir(parents=True)
     if anat:
         do_rsync(
-            input_dir=f"{sub_dir}/anat/",
-            output_dir=f"{output_dir}/{sub_entity}/anat/",
+            input_dir=f"{sub_dir}/anat/*_T?w.*",
+            output_dir=f"{output_dir}/{sub_entity}/{ses_entity}/anat",
             dry_run=dry_run,
             flags="-rltv",
         )
     if func:
         do_rsync(
-            f"{sub_dir}/func/",
-            output_dir=f"{output_dir}/{sub_entity}/func/",
+            f"{sub_dir}/func",
+            output_dir=f"{output_dir}/{sub_entity}/{ses_entity}",
             dry_run=dry_run,
             flags="-rltv",
         )
         do_rsync(
-            f"{sub_dir}/fmap/",
-            output_dir=f"{output_dir}/{sub_entity}/fmap/",
+            f"{sub_dir}/fmap",
+            output_dir=f"{output_dir}/{sub_entity}/{ses_entity}",
             dry_run=dry_run,
             flags="-rltv",
         )
     if dwi:
         do_rsync(
-            f"{sub_dir}/dwi/",
-            output_dir=f"{output_dir}/{sub_entity}/dwi/",
+            f"{sub_dir}/dwi",
+            output_dir=f"{output_dir}/{sub_entity}/{ses_entity}",
             dry_run=dry_run,
             flags="-rltv",
         )
@@ -283,9 +293,10 @@ def download_derivative_directory(
             - ``"~/MRI_Processing/BABIES/newborn/derivatives/bibsnet"``, or
             - ``"~/MRI_Processing/BABIES/newborn/derivatives/recon-all"``.
             
-            Can either be a relative or absolute path. Default is None, which will
-            use the current directory of the python interpreter is used. This path must
-            exist before running this function. If it doesnt, please create it first.
+            Can either be a relative or absolute path. Default is ``None``, which will
+            use the current directory of the python interpreter.
+            This path must exist before running this function. If it doesnt, pleas
+            create it first.
         dry_run : bool
             If True, the function will not copy any files, but will print the rsync command.
             Use this if you want to validate the behaviour of this function before
@@ -589,21 +600,21 @@ def delete_directory(path):
 
 
 def create_precomputed_jsons(
-    aseg_nifti_fpath,
-    brain_mask_fpath,
-    spatial_reference_fname,
+    precomputed_nifti_fpath,
+    precomputed_brain_mask_fpath,
+    spatial_reference_fpath,
 ):
     """Create json files for the aseg and brain_mask nifties in the precomputed directory.
 
     Parameters
     ----------
-    aseg_nifti_fpath : path-like
+    precomputed_nifti_fpath : path-like
         The path to the aseg nifti file. For example,
         ``"/Users/sealab/MRI_Processing/BABIES/derivatives/precomputed/sub-1401/anat/sub-1401_ses-newborn_space-T2w_desc-aseg_dseg.nii.gz"``.
-    brain_mask_fpath : path-like
+    precopmuted_brain_mask_fpath : path-like
         The path to the brain mask nifti file. For example,
         ``"/Users/sealab/MRI_Processing/BABIES/derivatives/precomputed/sub-1401/anat/sub-1401_ses-newborn_space-T2w_desc-brain_mask.nii.gz"``.
-    spatial_reference_fname : path-like
+    spatial_reference_fpath : path-like
         The path to the nifti file (within the bids/anat directory) that you want to use
         as the spatial reference for the precomputed aseg and brain mask files.
         For example:
@@ -620,20 +631,20 @@ def create_precomputed_jsons(
     --------
     >>> from utils.utils import create_precomputed_jsons
     >>> create_precomputed_jsons(
-    ...     aseg_nifti_fpath="/Users/sealab/MRI_Processing/BABIES/derivatives/precomputed/sub-1401/anat/sub-1401_ses-newborn_space-T2w_desc-aseg_dseg.nii.gz",
-    ...     brain_mask_fpath="/Users/sealab/MRI_Processing/BABIES/derivatives/precomputed/sub-1401/anat/sub-1401_ses-newborn_space-T2w_desc-brain_mask.nii.gz",
-    ...     spatial_reference_fname="/Users/sealab/MRI_Processing/BABIES/bids/subject/session/anat/sub-1401_ses-newborn_T2w.nii.gz",
+    ...     precomputed_nifti_fpath="/Users/sealab/MRI_Processing/BABIES/derivatives/precomputed/sub-1401/anat/sub-1401_ses-newborn_space-T2w_desc-aseg_dseg.nii.gz",
+    ...     precopmuted_brain_mask_fpath="/Users/sealab/MRI_Processing/BABIES/derivatives/precomputed/sub-1401/anat/sub-1401_ses-newborn_space-T2w_desc-brain_mask.nii.gz",
+    ...     spatial_reference_fpath="/Users/sealab/MRI_Processing/BABIES/bids/subject/session/anat/sub-1401_ses-newborn_T2w.nii.gz",
     ...     )
     """
-    spatial_reference_fname = Path(spatial_reference_fname).expanduser().resolve()
-    aseg_nifti_fpath = Path(aseg_nifti_fpath).expanduser().resolve()
-    brain_mask_fpath = Path(brain_mask_fpath).expanduser().resolve()
+    spatial_reference_fpath = Path(spatial_reference_fpath).expanduser().resolve()
+    aseg_nifti_fpath = Path(precomputed_nifti_fpath).expanduser().resolve()
+    brain_mask_fpath = Path(precomputed_brain_mask_fpath).expanduser().resolve()
 
     aseg_json_fpath = aseg_nifti_fpath.with_suffix(".json")
     brain_mask_json_fpath = brain_mask_fpath.with_suffix(".json")
-    bids_index = Path(spatial_reference_fname).parts.index("bids")
-    bpath = Path(*spatial_reference_fname.parts[: bids_index + 1])
-    spatial_reference_fname = spatial_reference_fname.relative_to(bpath)
+    bids_index = Path(spatial_reference_fpath).parts.index("bids")
+    bpath = Path(*spatial_reference_fpath.parts[: bids_index + 1])
+    spatial_reference_fname = spatial_reference_fpath.relative_to(bpath)
     # Create a JSON file and add the Spatial key to the jsons
     aseg_json = Config()
     aseg_json["SpatialReference"] = spatial_reference_fname
@@ -680,7 +691,7 @@ def create_precomputed_nifties(
         The path to the precomputed derivatives directory, excluding the subject and modality (e.g. anat).
         For example, ``"/Users/sealab/MRI_Processing/BABIES/derivatives/precomputed"``.
     space : str
-        This only applies if the nifti_fpath and brain_mask_fpath don't contain the
+        This only applies if ``aseg_nifti_fpath`` and ``brain_mask_fpath`` don't contain the
         space in the filename (e.g. if they are the aseg.nii.gz and brain_mask.nii.gz).
         In that case, specify here the space of the aseg and brain_mask files
         Must be ``"T1w"`` or ``"T2w"``. Default is "T1w".
@@ -712,6 +723,8 @@ def create_precomputed_nifties(
     ...     brain_mask_fpath="/Users/sealab/MRI_Processing/BABIES/derivatives/recon-all/sub-1459/brain_mask.nii.gz",
     ...     precomputed_dir="/Users/sealab/MRI_Processing/BABIES/derivatives/precomputed",
     """
+    # XXX: If the user passes in the BIBSnet output, we shouldn't rename the files and create jsons manually.
+    # XXX: We should just copy them over to the precomputed directory.
 
     # Checks
     aseg_nifti_fpath = Path(aseg_nifti_fpath).expanduser().resolve()
@@ -945,9 +958,20 @@ def rename_coregistered_t1w_files(anat_path):
         raise FileNotFoundError(f"{anat_path} does not exist")
     t1w_files = list(anat_path.glob("sub-*_T1w.nii.gz"))
     t1w_jsons = list(anat_path.glob("sub-*_T1w.json"))
+    if not t1w_files:
+        print(
+            f"No T1w files found in {anat_path}, Thus there are no Coregistered T1w files to rename."
+            " If you think this is an error, please check the directory."
+            )
     new_names = []
     for t1w in t1w_files + t1w_jsons:
         new_name = t1w.name.replace("_T1_coregistered2T2_ants", "")
+        if new_name == t1w.name:
+            print(
+                f"{t1w} already appears to be BIDS compliant, and was not coregistered to T2w."
+                " I will not rename this file. If you think this is an error, please report the issue."
+                )
+            continue
         new_name = anat_path / new_name
         t1w.rename(new_name)
         print(f"Renamed {t1w} to {new_name}")
