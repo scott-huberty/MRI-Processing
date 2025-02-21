@@ -1,5 +1,6 @@
 import shutil
 import subprocess
+from glob import glob
 from pathlib import Path
 from warnings import warn
 
@@ -78,6 +79,329 @@ def rsync_to_server(project, subject, session, dry_run=False, verbose="INFO"):
     assert dicom2bids_path.exists(), f"{dicom2bids_path} does not exist"
     do_rsync(dicom2bids_path, output_dir, dry_run, verbose)
 
+
+def download_bids_directory(
+    project,
+    subject_id,
+    session,
+    *,
+    output_dir,
+    anat=True,
+    func=True,
+    dwi=False,
+    dry_run=False,
+    login_name=None,
+    host_name=None,
+):
+    """use rsync to download the bids directory from 1 subject for a project like BABIES.
+
+    Parameters
+    ----------
+    project : str
+        Must be ``"BABIES"`` or ``"ABC"``, which will be converted to the
+        path for the project on the HumphreysLab server.
+    subject_id : str
+        The subject to copy. For example "12001".
+    session : str
+        The session to copy. Must be either "newborn" or "six_month".
+    output_dir : path-like
+        The output directory to copy to. Can either be a relative or absolute path.
+        Usually this will be the path to the local MRI-Processing BIDS directory,
+        e.g. ``"/Users/sealab/MRI_Processing/BABIES/newborn/bids"``.
+        If ``None``, the current working directory will be used.
+    dry_run : bool
+        If True, the function will not copy any files, but will print the rsync command.
+        Use this if you want to validate the behaviour of this function before
+        committing to the result. Default is False.
+    anat : bool
+        If True, the anat subdirectory will be copied. Default is True.
+    func : bool
+        If True, the func and fmap subdirectories will be copied. Default is True.
+    dwi : bool
+        If True, the dwi subdirectory will be copied. Default is False.
+    login_name : str
+        The login name to use when connecting to the server. For example,
+        ``"Lab Username"``. Default is None, which assumes that you have
+        locally mounted the server. This must be provided if host_name is provided.
+    host_name : str
+        The host name to use when connecting to the server. For example,
+        ``"XX.X.XXX.XXX"``. Default is None, which assumes that you have
+        locally mounted the server. This must be provided if login_name is provided.
+    
+    Returns
+    -------
+    output_dir : path-like
+        The path to the local BIDS/subject directory that was copied from the server.
+    
+    Notes
+    -----
+    .. important::
+        
+        - If you are not on the Whale computer, you must provide the login_name and host_name
+            parameters to connect to the server.
+        - Unlike the bids/subject directories on the server, this function will add a session
+            directory, e.g. ``"bids/sub-12001/ses-newborn"``. This is to be compliant with BIDS
+            and with Nibabies.
+    
+    Examples
+    --------
+    >>> from utils.utils import download_bids_directory
+    >>> download_bids_directory(
+    ...     project="BABIES",
+    ...     subject_id=1375,
+    ...     session="newborn",
+    ...     output_dir="/Users/sealab/MRI_Processing/BABIES/newborn/bids",
+    ...     anat=True,
+    ...     func=True,
+    ...     dwi=False,
+    ...     )
+
+    If you are not on the Whale computer, you can use the login_name and host_name
+    parameters to connect to the server. For example:
+
+    >>> download_bids_directory(
+    ...     project="BABIES",
+    ...     subject_id=1375,
+    ...     session="newborn",
+    ...     output_dir="/Users/sealab/MRI_Processing/BABIES/newborn/bids",
+    ...     login_name="Lab Username",
+    ...     host_name="XX.X.XXX.XXX",
+    ...     )
+    """
+    BABIES = Path("/Volumes") / "HumphreysLab" / "Daily_2" / "BABIES" / "MRI"
+    ABC = Path("/Volumes") / "HumphreysLab" / "Daily_2" / "ABC" / "MRI"
+    server_is_mounted = login_name is None or host_name is None
+
+    if project == "BABIES":
+        project_dir = BABIES
+        session_dirname = "six_month" if session == "sixmonth" else session
+    elif project == "ABC":
+        project_dir = ABC
+        session_dirname = session
+    
+    sub_entity = f"sub-{subject_id}"
+    ses_entity = f"ses-{session}"
+    session_dir = project_dir / session_dirname
+    bids_dir = session_dir / "bids"
+    sub_dir = bids_dir / sub_entity / ses_entity
+    if not server_is_mounted:
+        sub_dir = Path(f"{login_name}@{host_name}:{sub_dir}")
+
+    if output_dir is None:
+        output_dir = Path.cwd()
+    output_dir = Path(output_dir).expanduser().resolve()
+
+    ##########################################################################
+    # CHECKS
+    ##########################################################################
+
+    if not server_is_mounted:
+        if login_name is None:
+            raise ValueError(f"To download from a remote server, login_name must be provided. but got {login_name}")
+        if host_name is None:
+            raise ValueError(f"To download from a remote server, host_name must be provided. But got {host_name}")
+    if not output_dir.exists():
+        raise FileNotFoundError(f"{output_dir} does not exist")
+    if not isinstance(subject_id, (str, int)):
+        raise ValueError(
+            f"subject_id must be a string or number, but got: {subject_id}\n"
+            "Example: 12001 for sub-12001"
+        )
+    if session not in ["newborn", "sixmonth"]:
+        raise ValueError(
+            "session must be either 'newborn' or 'sixmonth',"
+            f" but got: {session}"
+        )
+    if not isinstance(anat, bool):
+        raise ValueError(f"anat_only must be a True or False, but got: {anat}")
+    if not isinstance(func, bool):
+        raise ValueError(f"func_only must be a True or False, but got: {func}")
+    if not isinstance(dwi, bool):
+        raise ValueError(f"dwi_only must be a True or False, but got: {dwi}")
+    if not isinstance(dry_run, bool):
+        raise ValueError(f"dry_run must be a True or False, but got: {dry_run}")
+    
+    ##########################################################################
+    # COPY
+    ##########################################################################
+    # Make the output parent directory if it doesn't exist
+    if not (output_dir / sub_entity).exists():
+        (output_dir / sub_entity / ses_entity).mkdir(parents=True)
+    if anat:
+        do_rsync(
+            input_dir=f"{sub_dir}/anat/*_T?w.*",
+            output_dir=f"{output_dir}/{sub_entity}/{ses_entity}/anat",
+            dry_run=dry_run,
+            flags="-rltv",
+        )
+    if func:
+        do_rsync(
+            f"{sub_dir}/func",
+            output_dir=f"{output_dir}/{sub_entity}/{ses_entity}",
+            dry_run=dry_run,
+            flags="-rltv",
+        )
+        do_rsync(
+            f"{sub_dir}/fmap",
+            output_dir=f"{output_dir}/{sub_entity}/{ses_entity}",
+            dry_run=dry_run,
+            flags="-rltv",
+        )
+    if dwi:
+        do_rsync(
+            f"{sub_dir}/dwi",
+            output_dir=f"{output_dir}/{sub_entity}/{ses_entity}",
+            dry_run=dry_run,
+            flags="-rltv",
+        )
+    return output_dir / sub_entity
+
+def download_derivative_directory(
+    project,
+    subject_id,
+    session,
+    *,
+    derivative: str,
+    output_dir=None,
+    dry_run=False,
+    login_name=None,
+    host_name=None,
+):
+    """use rsync to download the precomputed directory from 1 subject for a project like BABIES.
+
+        The "precomputed" files are the segmented anatomical files. They are usually pulled
+        from derivatives/bibsnet, derivatives/recon-all, derivatives/recon-all_final, or
+        derivatives/precomputed.
+
+        Parameters
+        ----------
+        project : str
+            Must be ``"BABIES"`` or ``"ABC"``, which will be converted to the
+            path for the project on the HumphreysLab server.
+        subject_id : str
+            The subject to copy. For example "12001".
+        session : str
+            The session to copy. Must be either "newborn" or "six_month".
+        derivative : str
+            The derivative to copy. For example ``"precomputed"``, ``"recon-all"``,
+            ``"bibsnet"``, or ``"recon-all_final"``.
+        output_dir : path-like
+            The local output directory to copy to. For example:
+
+            - ``"/Users/sealab/MRI_Processing/BABIES/newborn/derivatives/precomputed"``, or
+            - ``"~/MRI_Processing/BABIES/newborn/derivatives/bibsnet"``, or
+            - ``"~/MRI_Processing/BABIES/newborn/derivatives/recon-all"``.
+            
+            Can either be a relative or absolute path. Default is ``None``, which will
+            use the current directory of the python interpreter.
+            This path must exist before running this function. If it doesnt, pleas
+            create it first.
+        dry_run : bool
+            If True, the function will not copy any files, but will print the rsync command.
+            Use this if you want to validate the behaviour of this function before
+            committing to the result. Default is False.
+        login_name : str
+            The login name to use when connecting to the server. For example,
+            ``"Lab Username"``. Default is None, which assumes that you have
+            locally mounted the server. This must be provided if host_name is provided.
+        host_name : str
+            The host name to use when connecting to the server. For example,
+            ``"XX.X.XXX.XXX"``. Default is None, which assumes that you have
+            locally mounted the server. This must be provided if login_name is provided.
+    
+        Returns
+        -------
+        output_dir : path-like
+            The path to the local derivative/subject directory that was copied from the server.
+
+        Examples
+        --------
+        >>> from utils.utils import download_derivative_directory
+        >>> download_derivative_directory(
+        ...     project="BABIES",
+        ...     subject_id=1375,
+        ...     session="newborn",
+        ...     derivative="recon-all_final",
+        ...     output_dir="/Users/sealab/MRI_Processing/BABIES/newborn/derivatives/recon-all_final",
+        ...     )
+
+        If you are not on the Whale computer, you can use the login_name and host_name
+        parameters to connect to the server. For example:
+        >>> download_derivative_directory(
+        ...     project="BABIES",
+        ...     subject_id=1375,
+        ...     session="newborn",
+        ...     derivative="recon-all_final",
+        ...     output_dir="/Users/sealab/MRI_Processing/BABIES/newborn/derivatives/recon-all_final",
+        ...     login_name="Lab Username",
+        ...     host_name="XX.X.XXX.XXX",
+        ...     )
+    """
+    BABIES = Path("/Volumes") / "HumphreysLab" / "Daily_2" / "BABIES" / "MRI"
+    ABC = Path("/Volumes") / "HumphreysLab" / "Daily_2" / "ABC" / "MRI"
+    server_is_mounted = login_name is None or host_name is None
+
+    if project == "BABIES":
+        project_dir = BABIES
+        session_dirname = "six_month" if session == "sixmonth" else session
+    elif project == "ABC":
+        project_dir = ABC
+        session_dirname = session
+
+    sub_entity = f"sub-{subject_id}"
+    ses_entity = f"ses-{session}"
+    session_dir = project_dir / session_dirname
+    deriv_dir = session_dir / "derivatives" / derivative
+    sub_dir = deriv_dir / sub_entity
+    if not server_is_mounted:
+        sub_dir = Path(f"{login_name}@{host_name}:{sub_dir}")
+
+    if output_dir is None:
+        output_dir = Path.cwd()
+    output_dir = Path(output_dir).expanduser().resolve()
+
+    ##########################################################################
+    # CHECKS
+    ##########################################################################
+
+    if not server_is_mounted:
+        if login_name is None:
+            raise ValueError(f"To download from a remote server, login_name must be provided. but got {login_name}")
+        if host_name is None:
+            raise ValueError(f"To download from a remote server, host_name must be provided. But got {host_name}")
+    if not output_dir.exists():
+        raise FileNotFoundError(
+            f"{output_dir} does not exist. If this path is correct but does not exist, please create it first."
+            )
+    if not isinstance(subject_id, (str, int)):
+        raise ValueError(
+            f"subject_id must be a string or number, but got: {subject_id}\n"
+            "Example: 12001 for sub-12001"
+        )
+
+    if session not in ["newborn", "sixmonth"]:
+        raise ValueError(
+            "session must be either 'newborn' or 'sixmonth',"
+            f" but got: {session}"
+        )
+    if not isinstance(dry_run, bool):
+        raise ValueError(f"dry_run must be a True or False, but got: {dry_run}")
+
+    if login_name is not None or host_name is not None:
+        if login_name is None:
+            raise ValueError("login_name must be provided if host_name is provided")
+        if host_name is None:
+            raise ValueError("host_name must be provided if login_name is provided")
+
+    do_rsync(
+        sub_dir,
+        output_dir,
+        flags="-rltv",
+        dry_run=dry_run,
+    )
+    return output_dir / sub_entity
+
+    
 
 def pull_subject_files(
     project,
@@ -235,13 +559,10 @@ def do_rsync(
     filter_file=None,
     dry_run=False,
     flags="-ahR",
-    server_is_mounted=True,
     verbose="INFO",
 ):
     """Use rsync to copy files from one directory to another."""
-    if server_is_mounted:
-       assert Path(input_dir).exists(), f"{input_dir} does not exist"
-       assert output_dir.exists(), f"{output_dir} does not exist"
+
     flags = flags
     if verbose == "INFO":
         flags += "v"
@@ -262,8 +583,9 @@ def do_rsync(
         command += [f"--filter=merge {filter_file}"]
     print("\n")
     print(" ".join(command))
+    command = " ".join(command)
     print("\n")
-    subprocess.run(command)
+    subprocess.run(command, check=True, shell=True)
 
 
 def delete_directory(path):
@@ -274,106 +596,177 @@ def delete_directory(path):
 
 
 def create_precomputed_jsons(
-    precomputed_dir, spatial_reference_fname, subject, session, space="T2w"
+    precomputed_nifti_fpath,
+    precomputed_brain_mask_fpath,
+    spatial_reference_fpath,
 ):
-    """Create json files for aseg and brain_mask.
+    """Create json files for the aseg and brain_mask nifties in the precomputed directory.
 
     Parameters
     ----------
-    precomputed_dir : path-like
-        The path to the precomputed directory. Do not include the subject or session.
-        For example, ``"/Users/sealab/MRI_Processing/BABIES/derivatives/precomputed"``.
-    spatial_reference_fname : path-like
-        The path to the spatial reference file, in the ``anat`` folder in the ``bids`` directory.
+    precomputed_nifti_fpath : path-like
+        The path to the aseg nifti file. For example,
+        ``"/Users/sealab/MRI_Processing/BABIES/derivatives/precomputed/sub-1401/anat/sub-1401_ses-newborn_space-T2w_desc-aseg_dseg.nii.gz"``.
+    precopmuted_brain_mask_fpath : path-like
+        The path to the brain mask nifti file. For example,
+        ``"/Users/sealab/MRI_Processing/BABIES/derivatives/precomputed/sub-1401/anat/sub-1401_ses-newborn_space-T2w_desc-brain_mask.nii.gz"``.
+    spatial_reference_fpath : path-like
+        The path to the nifti file (within the bids/anat directory) that you want to use
+        as the spatial reference for the precomputed aseg and brain mask files.
         For example:
-        ``"/Users/sealab/MRI_Processing/BABIES/bids/subject/session/anat/sub-1401_ses-newborn_T1_coregistered2T2_ants_T1w.nii.gz"``.
+        ``"/Users/sealab/MRI_Processing/BABIES/bids/subject/session/anat/sub-1401_ses-newborn_T2w.nii.gz"``.
+    
+    Returns
+    -------
+    aseg_json_fpath : path-like
+        The path to the aseg json file.
+    brain_mask_json_fpath : path-like
+        The path to the brain mask json file.
+
+    Examples
+    --------
+    >>> from utils.utils import create_precomputed_jsons
+    >>> create_precomputed_jsons(
+    ...     precomputed_nifti_fpath="/Users/sealab/MRI_Processing/BABIES/derivatives/precomputed/sub-1401/anat/sub-1401_ses-newborn_space-T2w_desc-aseg_dseg.nii.gz",
+    ...     precopmuted_brain_mask_fpath="/Users/sealab/MRI_Processing/BABIES/derivatives/precomputed/sub-1401/anat/sub-1401_ses-newborn_space-T2w_desc-brain_mask.nii.gz",
+    ...     spatial_reference_fpath="/Users/sealab/MRI_Processing/BABIES/bids/subject/session/anat/sub-1401_ses-newborn_T2w.nii.gz",
+    ...     )
     """
-    aseg_json_fname = f"sub-{subject}_ses-{session}_space-{space}_desc-aseg_dseg.json"
-    mask_json_fname = f"sub-{subject}_ses-{session}_space-{space}_desc-brain_mask.json"
-    precomputed_dir = precomputed_dir / f"sub-{subject}"
-    aseg_json_fpath = precomputed_dir / "anat" / aseg_json_fname
-    mask_json_fpath = precomputed_dir / "anat" / mask_json_fname
-    bids_index = Path(spatial_reference_fname).parts.index("bids")
-    bpath = Path(*spatial_reference_fname.parts[: bids_index + 1])
-    spatial_reference_fname = spatial_reference_fname.relative_to(bpath)
-    # add the Spatial key to the jsons
+    spatial_reference_fpath = Path(spatial_reference_fpath).expanduser().resolve()
+    aseg_nifti_fpath = Path(precomputed_nifti_fpath).expanduser().resolve()
+    brain_mask_fpath = Path(precomputed_brain_mask_fpath).expanduser().resolve()
+
+    aseg_json_fpath = aseg_nifti_fpath.with_suffix(".json")
+    brain_mask_json_fpath = brain_mask_fpath.with_suffix(".json")
+    bids_index = Path(spatial_reference_fpath).parts.index("bids")
+    bpath = Path(*spatial_reference_fpath.parts[: bids_index + 1])
+    spatial_reference_fname = spatial_reference_fpath.relative_to(bpath)
+    # Create a JSON file and add the Spatial key to the jsons
     aseg_json = Config()
     aseg_json["SpatialReference"] = spatial_reference_fname
     aseg_json.save(aseg_json_fpath)
-    mask_json = Config()
-    mask_json["SpatialReference"] = spatial_reference_fname
-    mask_json.save(mask_json_fpath)
+    brain_mask_json = Config()
+    brain_mask_json["SpatialReference"] = spatial_reference_fname
+    brain_mask_json.save(brain_mask_json_fpath)
+    return aseg_json_fpath, brain_mask_json_fpath
 
 
-def create_precomputed_files(
-    reconall_dir, output_dir, subject, session, space="T2w", overwrite=False
+def create_precomputed_nifties(
+    aseg_nifti_fpath,
+    brain_mask_fpath,
+    precomputed_dir,
+    space="T2w",
+    overwrite=False,
 ):
-    """copy recon-all files to precomputed directory and rename them.
+    """Copy a derived aseg and brain mask nifti file to the precomputed directory.
 
     Parameters
     ----------
-    reconall_dir : path-like
-        The path to the local recon-all directory. Do not include the subject. For example,
-        ``"/users/selab/MRI_Processing/BABIES/derivatives/recon-all"``.
+    aseg_nifti_fpath : path-like
+        The path to the nifti file that you want to copy into the precomputed
+        directory. Often times this is the ``aseg.nii.gz`` file in the recon-all
+        directory. It can also be the ``sub-XXXX_ses-XX_space-T2w_desc-aseg_dseg.nii.gz``
+        file in the bibsnet directory. For example:
+
+        - ``"/users/sealab/MRI_Processing/BABIES/newborn/derivatives/recon-all/sub-1459/aseg.nii.gz"``.
+        - ``"/users/sealab/MRI_Processing/BABIES/derivatives/recon-all_final/sub-1459/aseg.nii.gz"``.
+        - ``"/users/sealab/MRI_Processing/BABIES/derivatives/bibsnet/sub-1459/sub-1459_ses-newborn_space-T2w_desc-aseg_dseg.nii.gz"``.
+
         This can be a relative or absolute path.
-    output_dir : path-like
-        The path to the precomputed directory. Do not include the subject or session.
+    brain_mask_fpath : path-like
+        The path to the brain mask file that you want to copy into the precomputed
+        directory. Often times this is the ``brain_mask.nii.gz`` file in the recon-all
+        directory. It can also be the ``sub-XXXX_ses-XX_space-T2w_desc-brain_mask.nii.gz``
+        file in the bibsnet directory. For example:
+
+        - ``"/users/sealab/MRI_Processing/BABIES/newborn/derivatives/recon-all/sub-1459/brain_mask.nii.gz"``.
+        - ``"/users/sealab/MRI_Processing/BABIES/derivatives/recon-all_final/sub-1459/brain_mask.nii.gz"``.
+        - ``"/users/sealab/MRI_Processing/BABIES/derivatives/bibsnet/sub-1459/sub-1459_ses-newborn_space-T2w_desc-brain_mask.nii.gz"``.
+
+    precomputed_dir : path-like
+        The path to the precomputed derivatives directory, excluding the subject and modality (e.g. anat).
         For example, ``"/Users/sealab/MRI_Processing/BABIES/derivatives/precomputed"``.
-    subject : str
-        The subject id, for example "12001".
-    session : str
-        The session. Must be either ``"newborn"`` or ``"six_month"``. Default is ``"newborn"``.
     space : str
-        The space of the aseg and brain_mask files. Must be ``"T1w"`` or ``"T2w"``.
-        Default is "T1w".
+        This only applies if ``aseg_nifti_fpath`` and ``brain_mask_fpath`` don't contain the
+        space in the filename (e.g. if they are the aseg.nii.gz and brain_mask.nii.gz).
+        In that case, specify here the space of the aseg and brain_mask files
+        Must be ``"T1w"`` or ``"T2w"``. Default is "T1w".
     overwrite : bool
         If True, the function will overwrite the files in the precomputed directory (if a file
         with the same name already exists). If False, the function will raise an error if a file
         with the same name already exists. Default is False.
+    
+    Returns
+    -------
+    precomputed_aseg_fpath : path-like
+        The path to the precomputed aseg file.
+    precomputed_brain_mask_fpath : path-like
+        The path to the precomputed brain mask file.
 
     Notes
     -----
-    This function will look for a file named ``aseg.nii.gz`` and ``brain_mask.nii.gz`` in the
-    recon-all directory. It will copy these files to the precomputed directory and rename them
-    to the following format: ``{subject}_ses-{session}_space-{space}_desc-aseg_dseg.nii.gz``
-    and ``{subject}_ses-{session}_space-{space}_desc-brain_mask.nii.gz``.
+    This will copy these files to the precomputed directory. If the do not fillow the bids convention,
+    then this function will rename them to the following format:
+
+    - ``{subject}_ses-{session}_space-{space}_desc-aseg_dseg.nii.gz``
+    - ``{subject}_ses-{session}_space-{space}_desc-brain_mask.nii.gz``.
+
+    Examples
+    --------
+    >>> from utils.utils import create_precomputed_nifties
+    >>> create_precomputed_nifties(
+    ...     aseg_nifti_fpath="/Users/sealab/MRI_Processing/BABIES/derivatives/recon-all/sub-1459/aseg.nii.gz",
+    ...     brain_mask_fpath="/Users/sealab/MRI_Processing/BABIES/derivatives/recon-all/sub-1459/brain_mask.nii.gz",
+    ...     precomputed_dir="/Users/sealab/MRI_Processing/BABIES/derivatives/precomputed",
     """
+    # XXX: If the user passes in the BIBSnet output, we shouldn't rename the files and create jsons manually.
+    # XXX: We should just copy them over to the precomputed directory.
 
     # Checks
-    if not Path(reconall_dir).exists():
-        raise FileNotFoundError(f"{reconall_dir} does not exist")
-    if not Path(output_dir).exists():
-        raise FileNotFoundError(f"{output_dir} does not exist")
-    if space not in ["T1w", "T2w"]:
-        raise ValueError(f"space must be either 'T1w' or 'T2w', but got: {space}")
-    if not subject.isnumeric():
-        raise ValueError(f"subject must be a number, but got: {subject}")
-    if session not in ["newborn", "sixmonth"]:
-        raise ValueError(
-            f"session must be either 'newborn' or 'six_month', but got: {session}"
-        )
+    aseg_nifti_fpath = Path(aseg_nifti_fpath).expanduser().resolve()
+    brain_mask_fpath = Path(brain_mask_fpath).expanduser().resolve()
+    precomputed_dir = Path(precomputed_dir).expanduser().resolve()
+    if not aseg_nifti_fpath.exists():
+        raise FileNotFoundError(
+            f"{aseg_nifti_fpath} does not exist. Can't copy it to precomputed directory")
+    if not brain_mask_fpath.exists():
+        raise FileNotFoundError(
+            f"{brain_mask_fpath} does not exist. Can't copy it to precomputed directory"
+            )
+    if not precomputed_dir.exists():
+        raise FileNotFoundError(
+            f"{precomputed_dir} does not exist. Please pass a valid precomputed directory to copy files into."
+            )
+    if "T1w" not in str(aseg_nifti_fpath) and "T2w" not in str(aseg_nifti_fpath):
+        if space not in ["T1w", "T2w"]:
+            raise ValueError(
+                f"{aseg_nifti_fpath.name} does not contain the space in the filename. "
+                "Please specify the space in the filename. The "
+                f"space must be either 'T1w' or 'T2w', but got: {space}"
+                )
 
-    output_dir = Path(output_dir).resolve()
-    recon_sub_dir = reconall_dir / f"sub-{subject}"
-    aseg_fpath = recon_sub_dir / "aseg.nii.gz"
-    assert aseg_fpath.exists(), f"{aseg_fpath} does not exist"
-    brain_mask_fpath = recon_sub_dir / "brain_mask.nii.gz"
-    assert brain_mask_fpath.exists(), f"{brain_mask_fpath} does not exist"
+    subject = get_subject_from_bids_path(aseg_nifti_fpath)
+    subject_id = subject.split("-")[1]
+    session = get_session_from_bids_path(aseg_nifti_fpath)
+    if "ses-" in session:
+        session = session.split("-")[1]
     precomputed_aseg_fname = (
-        f"sub-{subject}_ses-{session}_space-{space}_desc-aseg_dseg.nii.gz"
+        f"sub-{subject_id}_ses-{session}_space-{space}_desc-aseg_dseg.nii.gz"
     )
-    precomputed_mask_fname = (
-        f"sub-{subject}_ses-{session}_space-{space}_desc-brain_mask.nii.gz"
+    precomputed_brain_mask_fname = (
+        f"sub-{subject_id}_ses-{session}_space-{space}_desc-brain_mask.nii.gz"
     )
-    if not (output_dir / f"sub-{subject}").exists():
-        (output_dir / f"sub-{subject}").mkdir()
-        (output_dir / f"sub-{subject}" / "anat").mkdir()
+    if not (precomputed_dir / f"sub-{subject_id}").exists():
+        (precomputed_dir / f"sub-{subject_id}").mkdir()
+        (precomputed_dir / f"sub-{subject_id}" / "anat").mkdir()
+    
     precomputed_aseg_fpath = (
-        output_dir / f"sub-{subject}" / "anat" / precomputed_aseg_fname
+        precomputed_dir / f"sub-{subject_id}" / "anat" / precomputed_aseg_fname
     )
-    precomputed_mask_fpath = (
-        output_dir / f"sub-{subject}" / "anat" / precomputed_mask_fname
+    precomputed_brain_mask_fpath = (
+        precomputed_dir / f"sub-{subject_id}" / "anat" / precomputed_brain_mask_fname
     )
+
     # copy aseg and mask to precomputed directory
     if precomputed_aseg_fpath.exists():
         if not overwrite:
@@ -385,20 +778,75 @@ def create_precomputed_files(
             warn(f"{precomputed_aseg_fpath} already exists. Overwriting.")
             precomputed_aseg_fpath.unlink()
 
-    if precomputed_mask_fpath.exists():
+    if precomputed_brain_mask_fpath.exists():
         if not overwrite:
             raise FileExistsError(
-                f"{precomputed_mask_fpath} already exists. Set overwrite=True "
+                f"{precomputed_brain_mask_fpath} already exists. Set overwrite=True "
                 " to overwrite."
             )
         else:
-            warn(f"{precomputed_mask_fpath} already exists. Overwriting.")
-            precomputed_mask_fpath.unlink()
-    print(f"Copying {aseg_fpath} to {precomputed_aseg_fpath}\n")
-    shutil.copy(aseg_fpath, precomputed_aseg_fpath)
-    print(f"Copying {brain_mask_fpath} to {precomputed_mask_fpath}\n")
-    shutil.copy(brain_mask_fpath, precomputed_mask_fpath)
+            warn(f"{precomputed_brain_mask_fpath} already exists. Overwriting.")
+            precomputed_brain_mask_fpath.unlink()
+    print(f"Copying {aseg_nifti_fpath} to {precomputed_aseg_fpath}\n")
+    shutil.copy(aseg_nifti_fpath, precomputed_aseg_fpath)
+    print(f"Copying {brain_mask_fpath} to {precomputed_brain_mask_fpath}\n")
+    shutil.copy(brain_mask_fpath, precomputed_brain_mask_fpath)
+    return precomputed_aseg_fpath, precomputed_brain_mask_fpath
 
+
+def get_subject_from_bids_path(path):
+    """Get the subject entity from a BIDS compliant path 
+
+    Parameters
+    ----------
+    path : path-like
+        The path to the subject directory. For example,
+        ``"/Users/sealab/MRI_Processing/BABIES/newborn/derivatives/recon-all/sub-12001/aseg.nii.gz"``.
+
+    Returns
+    -------
+    subject : str
+        The subject BIDS entity. For example, "sub-12001".
+    """
+    path = Path(path).expanduser().resolve()
+    parts = path.parts
+    subject = [part for part in parts if part.startswith("sub-")]
+    if not subject:
+        raise ValueError(f"Can't infer the subject from {path}")
+    subject = subject[0]
+    return subject
+
+def get_session_from_bids_path(path):
+    """Get the session entity from a BIDS compliant path 
+
+    Parameters
+    ----------
+    path : path-like
+        The path to the subject directory. For example,
+        ``"/Users/sealab/MRI_Processing/BABIES/newborn/derivatives/recon-all/sub-12001/aseg.nii.gz"``.
+
+    Returns
+    -------
+    session : str
+        The session BIDS entity. For example, "ses-sixmonth".
+    """
+    path = Path(path).expanduser().resolve()
+    parts = path.parts
+    session = [part for part in parts if part.startswith("ses-")]
+    if not session:
+        session = [
+            part for part in parts
+            if part == "newborn"
+            or part == "sixmonth"
+            or part == "six_month"
+            or part == "twelvemonth"
+            ]
+        if len(session) > 1:
+            raise ValueError(f"Multiple sessions found in {path}. Can't infer which one to use.")
+        if not session:
+            raise ValueError(f"Can't infer the session from {path}")
+    session = session[0]
+    return session
 
 def create_filter_file(
     fpath,
@@ -474,22 +922,52 @@ def create_filter_file(
     return filter_file
 
 
-def rename_t1w_files(anat_path):
-    """Rename T1w files to match the bids standard.
+def rename_coregistered_t1w_files(anat_path):
+    """Rename T1w files that were coregistered to T2w using ANTS, to match the bids standard.
 
+    Parameters
+    ----------
+    anat_path : path-like
+        The path to the anat directory for 1 subject. For example,
+        ``"/Users/sealab/MRI_Processing/BABIES/newborn/bids/sub-12001/anat"``.
+
+    
+    Returns
+    -------
+    new_names : list of path-like
+        A list filenames, corresponding to the newly renamed T1w files.
+    
     Notes
     -----
     For example, ``sub-1011_ses-sixmonth_T1_coregistered2T2_ants_T1w.nii.gz`` will be renamed to
     ``sub-1011_ses-sixmonth_T1w.nii.gz``.
+
+    Examples
+    --------
+    >>> from utils.utils import rename_coregistered_t1w_files
+    >>> rename_coregistered_t1w_files(
+            "/Users/scotterik/MRI_Processing/BABIES/MRI/newborn/bids/sub-1159/anat"
+            )
     """
     anat_path = Path(anat_path)
     if not anat_path.exists():
         raise FileNotFoundError(f"{anat_path} does not exist")
     t1w_files = list(anat_path.glob("sub-*_T1w.nii.gz"))
     t1w_jsons = list(anat_path.glob("sub-*_T1w.json"))
+    if not t1w_files:
+        print(
+            f"No T1w files found in {anat_path}, Thus there are no Coregistered T1w files to rename."
+            " If you think this is an error, please check the directory."
+            )
     new_names = []
     for t1w in t1w_files + t1w_jsons:
         new_name = t1w.name.replace("_T1_coregistered2T2_ants", "")
+        if new_name == t1w.name:
+            print(
+                f"{t1w} already appears to be BIDS compliant, and was not coregistered to T2w."
+                " I will not rename this file. If you think this is an error, please report the issue."
+                )
+            continue
         new_name = anat_path / new_name
         t1w.rename(new_name)
         print(f"Renamed {t1w} to {new_name}")

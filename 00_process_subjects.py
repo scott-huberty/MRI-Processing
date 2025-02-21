@@ -76,14 +76,14 @@ def parse_args():
         help="path to the local Nibabies repository. Only used if use_dev is used. If no path is provided, the default path is used.",
     )
     parser.add_argument(
-        "--ip-address",
-        dest="ip_address",
+        "--host_name",
+        dest="host_name",
         help="The IP address of the Whale computer, if you running these scripts from a remote computer or server. For example, the format can be 'XX.X.XXX.XXX'.",
         default=None,
     )
     parser.add_argument(
-        "--username",
-        dest="username",
+        "--login_name",
+        dest="login_name",
         help="The username to use when connecting to the Whale computer. For example, 'Lab Username'.",
         default=None,
     )
@@ -100,19 +100,23 @@ def process_one_subject(
     version="latest",
     use_dev=False,
     nibabies_path=None,
-    ip_address=None,
-    username=None,
+    login_name=None,
+    host_name=None,
 ):
     """Process one subject. Use subprocess to run individual scripts."""
     print(f" 👇 Processing started for subject {subject} {session}👇 \n")
     # Pull down the subject files from the server
+    download_bids_dir_kwargs = {}
+    if anat_only:
+        print("🔽 Pulling down anatomical files only.")
+        download_bids_dir_kwargs.update({"anat": True, "func": False, "dwi": False})
     _0_pull_subject_files.main(
         project=project,
         subject=subject,
         session=session,
-        anat_only=anat_only,
-        ip_address=ip_address,
-        username=username,
+        login_name=login_name,
+        host_name=host_name,
+        download_bids_dir_kwargs=download_bids_dir_kwargs,
     )
     # run nibabies
     _1_run_nibabies.main(
@@ -131,8 +135,8 @@ def process_one_subject(
         subject=subject,
         session=session,
         surface_recon_method=surface_recon_method,
-        ip_address=ip_address,
-        username=username,
+        ip_address=host_name,
+        username=login_name,
     )
     # Clean up local files
     _3_delete_local_directories.clean_up(
@@ -154,8 +158,8 @@ def main(**kwargs):
     version = kwargs["version"]
     use_dev = kwargs.get("use_dev", False)
     nibabies_path = kwargs.get("nibabies_path", None)
-    ip_address = kwargs.get("ip_address", None)
-    username = kwargs.get("username", None)
+    host_name = kwargs.get("host_name", None)
+    login_name = kwargs.get("login_name", None)
 
     assert isinstance(anat_only, bool), "anat_only must be a boolean."
     subject_success_file = Path(f"./logs/{project}_subject_success.txt")
@@ -174,8 +178,8 @@ def main(**kwargs):
                 version=version,
                 use_dev=use_dev,
                 nibabies_path=nibabies_path,
-                ip_address=ip_address,
-                username=username,
+                host_name=host_name,
+                login_name=login_name,
             )
         except Exception as e:
             mgs = f"❌ Error processing subject {subject}: {e}"
