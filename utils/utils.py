@@ -194,7 +194,7 @@ def download_bids_directory(
     # CHECKS
     ##########################################################################
 
-    if server_is_mounted:
+    if not server_is_mounted:
         if login_name is None:
             raise ValueError(f"To download from a remote server, login_name must be provided. but got {login_name}")
         if host_name is None:
@@ -365,7 +365,7 @@ def download_derivative_directory(
     # CHECKS
     ##########################################################################
 
-    if server_is_mounted:
+    if not server_is_mounted:
         if login_name is None:
             raise ValueError(f"To download from a remote server, login_name must be provided. but got {login_name}")
         if host_name is None:
