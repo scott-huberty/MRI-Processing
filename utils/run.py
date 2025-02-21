@@ -100,10 +100,11 @@ def prepare_subject_files(
     server_is_mounted = not (login_name or host_name)
     subject_id = str(subject_id)
 
-    if login_name and not host_name:
-        raise ValueError("If login_name is provided, host_name must also be provided.")
-    if host_name and not login_name:
-        raise ValueError("If host_name is provided, login_name must also be provided.")
+    if not server_is_mounted:
+        if login_name and not host_name:
+            raise ValueError("If login_name is provided, host_name must also be provided.")
+        if host_name and not login_name:
+            raise ValueError("If host_name is provided, login_name must also be provided.")
 
     if check_args is None:
         check_args = {"local": True, "server": False, "mode": "error"}
