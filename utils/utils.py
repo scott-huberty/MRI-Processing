@@ -565,11 +565,7 @@ def do_rsync(
     verbose="INFO",
 ):
     """Use rsync to copy files from one directory to another."""
-    if "@" not in str(input_dir):
-        if "anat" in input_dir:
-           assert Path(input_dir).resolve().parent.exists(), f"{input_dir} does not exist"
-        else:
-           assert Path(input_dir).resolve().exists(), f"{input_dir} does not exist"
+
     flags = flags
     if verbose == "INFO":
         flags += "v"
