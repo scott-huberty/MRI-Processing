@@ -571,14 +571,6 @@ def do_rsync(
     if dry_run:
         flags += "n"
 
-    input_dir = str(input_dir)
-    # if the user is on the whale computer, shell expansion does not work under the hood..
-    if "@" not in input_dir:
-        if "*" in input_dir or "?" in input_dir:
-            files = glob(input_dir)
-            if len(files) == 0:
-                raise FileNotFoundError(f"No files found with pattern: {input_dir}")
-            input_dir = " ".join(files)        
     command = [
         "rsync",
         f"{flags}",
@@ -591,8 +583,9 @@ def do_rsync(
         command += [f"--filter=merge {filter_file}"]
     print("\n")
     print(" ".join(command))
+    command = " ".join(command)
     print("\n")
-    subprocess.run(command, check=True)
+    subprocess.run(command, check=True, shell=True)
 
 
 def delete_directory(path):
