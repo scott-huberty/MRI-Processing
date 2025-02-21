@@ -1,5 +1,6 @@
 import shutil
 import subprocess
+from glob import glob
 from pathlib import Path
 from warnings import warn
 
@@ -570,6 +571,14 @@ def do_rsync(
     if dry_run:
         flags += "n"
 
+    input_dir = str(input_dir)
+    # if the user is on the whale computer, shell expansion does not work under the hood..
+    if "@" not in input_dir:
+        if "*" in input_dir or "?" in input_dir:
+            files = glob(input_dir)
+            if len(files) == 0:
+                raise FileNotFoundError(f"No files found with pattern: {input_dir}")
+            input_dir = " ".join(files)        
     command = [
         "rsync",
         f"{flags}",
@@ -583,7 +592,7 @@ def do_rsync(
     print("\n")
     print(" ".join(command))
     print("\n")
-    subprocess.run(command)
+    subprocess.run(command, check=True)
 
 
 def delete_directory(path):
