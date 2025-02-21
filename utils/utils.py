@@ -184,7 +184,7 @@ def download_bids_directory(
     bids_dir = session_dir / "bids"
     sub_dir = bids_dir / sub_entity / ses_entity
     if not server_is_mounted:
-        sub_dir = f"{login_name}@{host_name}:{sub_dir}"
+        sub_dir = Path(f"{login_name}@{host_name}:{sub_dir}")
 
     if output_dir is None:
         output_dir = Path.cwd()
@@ -199,8 +199,6 @@ def download_bids_directory(
             raise ValueError(f"To download from a remote server, login_name must be provided. but got {login_name}")
         if host_name is None:
             raise ValueError(f"To download from a remote server, host_name must be provided. But got {host_name}")
-        if not sub_dir.exists():
-            raise FileNotFoundError(f"{sub_dir} does not exist")
     if not output_dir.exists():
         raise FileNotFoundError(f"{output_dir} does not exist")
     if not isinstance(subject_id, (str, int)):
@@ -355,7 +353,7 @@ def download_derivative_directory(
     deriv_dir = session_dir / "derivatives" / derivative
     sub_dir = deriv_dir / sub_entity
     if not server_is_mounted:
-        sub_dir = f"{login_name}@{host_name}:{sub_dir}"
+        sub_dir = Path(f"{login_name}@{host_name}:{sub_dir}")
 
     if output_dir is None:
         output_dir = Path.cwd()
@@ -370,8 +368,6 @@ def download_derivative_directory(
             raise ValueError(f"To download from a remote server, login_name must be provided. but got {login_name}")
         if host_name is None:
             raise ValueError(f"To download from a remote server, host_name must be provided. But got {host_name}")
-        if not sub_dir.exists():
-            raise FileNotFoundError(f"{sub_dir} does not exist")
     if not output_dir.exists():
         raise FileNotFoundError(
             f"{output_dir} does not exist. If this path is correct but does not exist, please create it first."
