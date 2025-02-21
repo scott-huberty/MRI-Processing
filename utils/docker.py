@@ -1,6 +1,5 @@
 import subprocess
 from pathlib import Path
-
 from pprint import pprint as pp
 
 
@@ -61,6 +60,7 @@ def run_nibabies(
     """
     if root is None:
         root = "/Users/sealab/MRI_Processing"
+        root = Path(__file__).parent.parent.resolve()
     if freesurfer_license is None:
         freesurfer_license = Path("./utils/assets/license.txt").resolve()
         assert freesurfer_license.exists()
