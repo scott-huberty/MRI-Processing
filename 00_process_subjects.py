@@ -158,8 +158,8 @@ def main(**kwargs):
     version = kwargs["version"]
     use_dev = kwargs.get("use_dev", False)
     nibabies_path = kwargs.get("nibabies_path", None)
-    ip_address = kwargs.get("ip_address", None)
-    username = kwargs.get("username", None)
+    host_name = kwargs.get("host_name", None)
+    login_name = kwargs.get("login_name", None)
 
     assert isinstance(anat_only, bool), "anat_only must be a boolean."
     subject_success_file = Path(f"./logs/{project}_subject_success.txt")
@@ -178,8 +178,8 @@ def main(**kwargs):
                 version=version,
                 use_dev=use_dev,
                 nibabies_path=nibabies_path,
-                ip_address=ip_address,
-                username=username,
+                host_name=host_name,
+                login_name=login_name,
             )
         except Exception as e:
             mgs = f"❌ Error processing subject {subject}: {e}"
