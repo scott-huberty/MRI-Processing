@@ -570,7 +570,6 @@ def do_rsync(
            assert Path(input_dir).resolve().parent.exists(), f"{input_dir} does not exist"
         else:
            assert Path(input_dir).resolve().exists(), f"{input_dir} does not exist"
-        assert Path(output_dir).resolve().exists(), f"{output_dir} does not exist"
     flags = flags
     if verbose == "INFO":
         flags += "v"
