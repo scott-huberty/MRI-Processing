@@ -97,7 +97,8 @@ def prepare_subject_files(
     nifti files in the local precomputed directory, with a "SpatialReference" key pointing to the
     spatial reference file in the local anat directory.
     """
-    server_is_mounted = not (login_name or host_name)
+    server_is_mounted = not (login_name or host_name) # True if on Whale computer
+
     subject_id = str(subject_id)
 
     if not server_is_mounted:
