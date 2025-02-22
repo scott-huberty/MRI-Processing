@@ -19,17 +19,17 @@ def clean_up(subject, session, project, surface_recon_method):
     
     freesurfer_path = sourcedata_path / "freesurfer" / f"sub-{subject}"
     if not freesurfer_path.exists():
-        msg = f"{freesurfer_path} does not exist"
-        if surface_recon_method == "mcribs":
-            msg += "MCRIBS may have failed. Please check the logs."
+        # newer versions of nibabies append session to the filename
+        freesurfer_path = freesurfer_path.parent / f"sub-{subject}_ses-{session}"
     if surface_recon_method == "mcribs":
         mcribs_path = sourcedata_path / "mcribs" / f"sub-{subject}"
-        assert mcribs_path.exists()
+        if not mcribs_path.exists():
+            # newer versions of nibabies append session to the filename
+            mcribs_path = mcribs_path.parent / f"sub-{subject}_ses-{session}"
 
     precomputed_path = derivatives_path / "precomputed" / f"sub-{subject}"
     assert precomputed_path.exists()
     reconall_path = derivatives_path / "recon-all" / f"sub-{subject}"
-    assert reconall_path.exists()
     work_path = derivatives_path / "work" / "nibabies_work"
     work_paths = list(work_path.glob("*/"))
     assert work_path.exists()
@@ -49,10 +49,33 @@ def clean_up(subject, session, project, surface_recon_method):
 def parse_args():
     # use argparse to get the subject id, session id, and project name
     parser = argparse.ArgumentParser(description='Clean up Nibabies directories.')
-    parser.add_argument('project', choices=["BABIES", "ABC"], help='project name, such as BABIES')
-    parser.add_argument('subject', type=str, help='subject label. such as 1103')
-    parser.add_argument('session', choices=["newborn", "sixmonth"], type=str, help='session label, such as newborn')
-    parser.add_argument("surface_recon_method", choices=["mcribs", "freesurfer"], help="surface reconstruction method, such as mcribs.")
+    parser.add_argument(
+        '--project',
+        dest="project",
+        type=str,
+        choices=["BABIES", "ABC"],
+        help='project name, such as BABIES'
+        )
+    parser.add_argument(
+        '--subject',
+        dest="subject",
+        type=str,
+        help='subject label. such as 1103'
+        )
+    parser.add_argument(
+        '--session',
+        dest="session",
+        type=str,
+        choices=["newborn", "sixmonth"],
+        help='session label, such as newborn'
+        )
+    parser.add_argument(
+        "--surface_recon_method",
+        dest="surface_recon_method",
+        type=str,
+        choices=["mcribs", "freesurfer"],
+        help="surface reconstruction method, such as mcribs."
+        )
     args = parser.parse_args()
     return vars(args)
 
