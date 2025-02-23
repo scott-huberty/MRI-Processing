@@ -143,7 +143,6 @@ def process_one_subject(
         project=project,
         subject=subject,
         session=session,
-        surface_recon_method=surface_recon_method,
     )
     print(f"✅ Processing completed for subject {subject}\n")
 
