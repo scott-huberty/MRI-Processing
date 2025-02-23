@@ -32,7 +32,7 @@ def clean_up(subject, session, project):
     work_path = derivatives_path / "work" / "nibabies_work"
     work_paths = list(work_path.glob("*/"))
     # We want to keep the .gitkeep file
-    work_paths = [fpath for fpath in work_fpaths if not fpath.startswith(".")]
+    work_paths = [fpath for fpath in work_paths if not fpath.name.startswith(".")]
     assert work_path.exists()
     assert len(work_paths)
 
