@@ -109,11 +109,17 @@ def prepare_subject_files(
 
     if check_args is None:
         check_args = {"local": True, "server": False, "mode": "error"}
+    
+    if not download_bids_dir_kwargs.get("func", False):
+        anat_only = True
+    else:
+        anat_only = False
     config = SubjectConfig(
         project,
         subject_id,
         session,
         get_spatial_file=False,
+        anat_only=anat_only,
         server_is_mounted=server_is_mounted,
     )
 
@@ -142,6 +148,7 @@ def prepare_subject_files(
         dry_run=dry_run,
         login_name=login_name,
         host_name=host_name,
+        **download_bids_dir_kwargs,
         )
 
     if download_derivative_dir_kwargs is None:
