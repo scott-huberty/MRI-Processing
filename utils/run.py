@@ -192,11 +192,6 @@ def prepare_subject_files(
         anat_dir = config["local_paths"]["sub_anatpath"]
     rename_coregistered_t1w_files(anat_dir)
 
-    # If the user only plans to run the anatomical portion of Nibabies
-    # they can skip the precomputed files
-    if not download_bids_dir_kwargs.get("func", True):
-        return
-
     if create_precomputed_nifties_kwargs is None:
         create_precomputed_nifties_kwargs = {}
     aseg_nifti_fpath = create_precomputed_nifties_kwargs.get("aseg_nifti_fpath", None)
@@ -204,7 +199,6 @@ def prepare_subject_files(
     precomputed_dir = create_precomputed_nifties_kwargs.get("precomputed_dir", None)
     space = create_precomputed_nifties_kwargs.get("space", None)
     overwrite = create_precomputed_nifties_kwargs.get("overwrite", True) # we are overriding the default value of False
-    
     if aseg_nifti_fpath is None:
         aseg_nifti_dir = derivative_dir / f"sub-{subject_id}"
         aseg_nifti_fpath = list(aseg_nifti_dir.rglob("aseg.nii.gz"))
