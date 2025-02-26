@@ -98,6 +98,16 @@ def prepare_subject_files(
     spatial reference file in the local anat directory.
     """
     server_is_mounted = not (login_name or host_name) # True if on Whale computer
+    if download_bids_dir_kwargs is None:
+        download_bids_dir_kwargs = {}
+    if download_derivative_dir_kwargs is None:
+        download_derivative_dir_kwargs = {}
+    if rename_coregistered_t1w_files_kwargs is None:
+        rename_coregistered_t1w_files_kwargs = {}
+    if create_precomputed_nifties_kwargs is None:
+        create_precomputed_nifties_kwargs = {}
+    if create_precomputed_jsons_kwargs is None:
+        create_precomputed_jsons_kwargs = {}
 
     subject_id = str(subject_id)
 
@@ -122,9 +132,6 @@ def prepare_subject_files(
         anat_only=anat_only,
         server_is_mounted=server_is_mounted,
     )
-
-    if download_bids_dir_kwargs is None:
-        download_bids_dir_kwargs = {}
     
     anat = download_bids_dir_kwargs.get("anat", True)
     func = download_bids_dir_kwargs.get("func", True)
@@ -150,9 +157,6 @@ def prepare_subject_files(
         host_name=host_name,
         **download_bids_dir_kwargs,
         )
-
-    if download_derivative_dir_kwargs is None:
-        download_derivative_dir_kwargs = {}
     
     derivative = download_derivative_dir_kwargs.get("derivative", "recon-all")
     derivative_dir = download_derivative_dir_kwargs.get("output_dir", None)
@@ -183,9 +187,6 @@ def prepare_subject_files(
     config.get_spatial_file()
     config.check_paths(local=True, server=False, mode="error")
     
-    
-    if rename_coregistered_t1w_files_kwargs is None:
-        rename_coregistered_t1w_files_kwargs = {}
     
     anat_dir = rename_coregistered_t1w_files_kwargs.get("anat_dir", None)
     if anat_dir is None:
@@ -252,8 +253,6 @@ def prepare_subject_files(
         overwrite=overwrite
     )
 
-    if create_precomputed_jsons_kwargs is None:
-        create_precomputed_jsons_kwargs = {}
     precomputed_nifti_fpath = create_precomputed_jsons_kwargs.get("precomputed_nifti_fpath", None)
     precomputed_brain_mask_fpath = create_precomputed_jsons_kwargs.get("precomputed_brain_mask_fpath", None)
     spatial_reference_fpath = create_precomputed_jsons_kwargs.get("spatial_reference_fpath", None)
