@@ -110,6 +110,9 @@ class SubjectConfig(Config):
                         logger.debug(e)
                     elif name.endswith("fname"):
                         logger.debug(e)
+                    # If the user wants to grab a different derivative, then the default path is irrelevent
+                    elif "sub_reconall" in name:
+                        logger.debug(e)
                     elif self["anat_only"] and (
                         name.endswith("func")
                         or name.endswith("funcpath")
