@@ -137,15 +137,15 @@ def prepare_subject_files(
     func = download_bids_dir_kwargs.get("func", True)
     dwi = download_bids_dir_kwargs.get("dwi", False)
     bids_dir = download_bids_dir_kwargs.get("output_dir", None)
+    session_dir = "six_month" if project == "BABIES" and session == "sixmonth" else session
 
     if not anat and not func and not dwi:
         raise ValueError(
             "You must download at least one of the anat, func, or dwi directories"
             f" from the server. You provided anat={anat}, func={func}, dwi={dwi}."
         )
-
     if bids_dir is None:
-        bids_dir = Path(__file__).resolve().parent.parent / project / "MRI" / session / "bids"
+        bids_dir = Path(__file__).resolve().parent.parent / project / "MRI" / session_dir / "bids"
     print(f"Downloading BIDS directory to {bids_dir}.")
     download_bids_directory(
         project=project,
@@ -160,12 +160,12 @@ def prepare_subject_files(
     
     derivative = download_derivative_dir_kwargs.get("derivative", "recon-all")
     derivative_dir = download_derivative_dir_kwargs.get("output_dir", None)
-    if derivative_dir is None:
+    if derivative_dir is None:        
         derivative_dir = (
             Path(__file__).resolve().parent.parent /
             project /
             "MRI" /
-            session / 
+            session_dir / 
             "derivatives" /
             derivative
         )
@@ -239,7 +239,7 @@ def prepare_subject_files(
             Path(__file__).resolve().parent.parent /
             project /
             "MRI" /
-            session /
+            session_dir /
             "derivatives" /
             "precomputed"
         )
