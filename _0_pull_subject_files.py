@@ -165,6 +165,10 @@ def parse_kwargs(pairs):
         if "=" not in pair:
             raise argparse.ArgumentTypeError(f"Expected key=value pair, but got {pair}")
         key, value = pair.split("=", 1)
+        if value.lower() == "true":
+            value = True
+        elif value == "false":
+            value = False
         kwargs[key] = value
     return kwargs
 
