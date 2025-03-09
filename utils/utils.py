@@ -846,6 +846,11 @@ def get_session_from_bids_path(path):
         if not session:
             raise ValueError(f"Can't infer the session from {path}")
     session = session[0]
+    if session.startswith("ses-"):
+        session = session.split("-")[1]
+    if session == "six_month":
+        print(f"{path.name} contains 'six_month'. interpreting this as 'sixmonth' session.")
+        session = "sixmonth"
     return session
 
 def create_filter_file(
