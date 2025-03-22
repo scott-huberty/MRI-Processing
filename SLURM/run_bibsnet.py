@@ -9,8 +9,8 @@ def parse_args():
         "--project",
         type=str,
         dest="project",
-        choices=["BABIES", "ABC"],
-        help="Project name. Must be one 'BABIES', or 'ABC'",
+        choices=["BABIES", "ABC", "BABIES-Stanford"],
+        help="Project name. Must be 'BABIES', 'ABC', or 'BABIES-Stanford'",
         required=True,
     )
     parser.add_argument(
@@ -50,7 +50,7 @@ def main(
     Parameters
     ----------
     project : str
-        Project name. Must be one 'BABIES', or 'ABC'.
+        Project name. Must be 'BABIES', 'ABC', or 'BABIES-Stanford'.
     subject : str
         The label of the participant that should be analyzed, for example 1011 for sub-1011.
     session : str
