@@ -81,6 +81,8 @@ BABIES-Stanford/MRI/newborn/bids/*
 !BABIES-Stanford/MRI/newborn/bids/
 !BABIES-Stanford/MRI/newborn/bids/dataset_description.json
 
+BABIES-Stanford/MRI/newborn/derivatives/BIBSnet/sub-*
+
 BABIES-Stanford/MRI/newborn/derivatives/precomputed/*
 !BABIES-Stanford/MRI/newborn/derivatives/precomputed/
 !BABIES-Stanford/MRI/newborn/derivatives/precomputed/dataset_description.json
@@ -106,6 +108,9 @@ BABIES-Stanford/MRI/sixmonth/.bidsignore
 BABIES-Stanford/MRI/sixmonth/bids/*
 !BABIES-Stanford/MRI/sixmonth/bids/
 !BABIES-Stanford/MRI/sixmonth/bids/dataset_description.json
+
+
+BABIES-Stanford/MRI/sixmonth/derivatives/BIBSnet/sub-*
 
 BABIES-Stanford/MRI/sixmonth/derivatives/precomputed/*
 !BABIES-Stanford/MRI/sixmonth/derivatives/precomputed/
