@@ -23,16 +23,16 @@ get_age_in_months() {
 if [ "$#" -lt 4 ] || [ "$#" -gt 5 ]; then
     echo "run_nibabies.sh expects 4 positional arguments, and 1 additinal argument can be added. You passed $#"
     echo "Usage: $0 <PROJECT> <PARTICIPANT_LABEL> <AGE_DESCRIPTION> <SURFACE_RECON_METHOD> <ANAT_ONLY>"
-    echo "PROJECT can be: ABC, BABIES. Got $1"
+    echo "PROJECT can be: ABC, BABIES, or BABIES-Stanford. Got $1"
     echo "PARTICIPANT_LABEL can be 1462, for example. Got $2"
     echo "AGE_DESCRIPTION can be: newborn, sixmonth, twelvemonth. Got $3"
     echo "SURFACE_RECON_METHOD must be: infantfs or mcribs. Got $4"
-    echo "ANAT_Only is option and can be included by passing --anat-only. Got $5"
+    echo "ANAT_ONLY is option and can be included by passing --anat-only. Got $5"
     exit 1
 fi
 
 # Define the image and options
-IMAGE="docker://nipreps/nibabies:23.1.0"
+IMAGE="/gpfs51/dors2/l3_humphreys_lab/dev/images/nibabies_latest.sif"  # "docker://nipreps/nibabies:23.1.0"
 PROJECT=$1
 PARTICIPANT_LABEL=$2
 AGE_DESCRIPTION=$3
@@ -49,8 +49,8 @@ fi
 
 
 # Validate project
-if [[ "$PROJECT" != "ABC" && "$PROJECT" != "BABIES" ]]; then
-    echo "Error: PROJECT must be either 'ABC' or 'BABIES' but got $PROJECT"
+if [[ "$PROJECT" != "ABC" && "$PROJECT" != "BABIES" && "$PROJECT" != "BABIES-Stanford" ]]; then
+    echo "Error: PROJECT must be either 'ABC' or 'BABIES', or 'BABIES-Stanford' but got $PROJECT"
     exit 1
 fi
 
@@ -67,8 +67,8 @@ SESSION_DIR="$PROJECT_DIR/$AGE_DESCRIPTION"
 BIDS_DIR="$SESSION_DIR/bids"
 DERIVATIVES_DIR="$SESSION_DIR/derivatives"
 OUT_DIR="$DERIVATIVES_DIR/Nibabies"
-SCRATCH_DIR="$DERIVATIVES_DIR/work/nibabies_work"
-PRECOMPUTED_DIR="$DERIVATIVES_DIR/precomputed"
+SCRATCH_DIR="/gpfs51/dors2/l3_humphreys_lab/nibabies_work"  # "$DERIVATIVES_DIR/work/nibabies_work"
+PRECOMPUTED_DIR="$DERIVATIVES_DIR/BIBSnet"  # precomputed"
 LICENSE_FILE="$ROOT_DIR/utils/assets/license.txt"
 
 echo "Passing these parameters to singularity"
