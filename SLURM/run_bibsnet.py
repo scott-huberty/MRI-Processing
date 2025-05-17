@@ -71,6 +71,7 @@ def main(
     mri_processing_dir = slurm_dir.parent
     bids_path = (mri_processing_dir / project / "MRI" / session_dir / "bids").absolute()
     derivatives_path = (mri_processing_dir / project / "MRI" / session_dir / "derivatives").absolute()
+    work_path = Path("/gpfs51/dors2/l3_humphreys_lab/bibsnet_work")
     if not bids_path.exists():
         raise FileNotFoundError(f"BIDS directory not found: {bids_path}")
     if not derivatives_path.exists():
@@ -87,12 +88,16 @@ def main(
         f"{bids_path}:/input",
         "--bind",
         f"{derivatives_path}:/output",
+        "--bind",
+        f"{work_path}:/worktmp",
         image_path,
         "/input",
         "/output",
         "participant",
         "-participant",
         subject,
+        "-w",
+        "/worktmp"
         ]
     )
 

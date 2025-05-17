@@ -1,8 +1,8 @@
 #!/bin/bash
 #SBATCH --account=accre_guests_acc
-#SBATCH --partition=turing
-#SBATCH --gres=gpu:2
-#SBATCH --mail-user=scott.huberty@vanderbilt.edu
+#SBATCH --partition=batch_gpu
+#SBATCH --gres=gpu:nvidia_rtx_a6000:2
+#SBATCH --mail-user=yanbin.niu@vanderbilt.edu
 #SBATCH --mail-type=ALL
 #SBATCH --nodes=1
 #SBATCH --ntasks=4

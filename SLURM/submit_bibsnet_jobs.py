@@ -39,7 +39,7 @@ def parse_args():
 		"--session",
 		required=True,
 		dest="session",
-		choices=["newborn", "sixmonth"],
+		choices=["newborn", "sixmonth", "twelvemonth"],
 		help="Whether to run BIBSNet for newborn or sixmonth timepoint. Must be 'newborn' or 'sixmonth'."
 	)
 	args = parser.parse_args()
