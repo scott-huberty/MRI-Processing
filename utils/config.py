@@ -145,8 +145,9 @@ class SubjectConfig(Config):
     def create_path_dict(self, location="server"):
         subject_id = self["subject_id"]
         session = self["session"]
+        project = self["project"]
         # SEALAB sometimes uses six_month instead of sixmonth. bids expects sixmonth
-        session_dir = "six_month" if session == "sixmonth" else session
+        session_dir = "six_month" if session == "sixmonth" and project == "BABIES" else session
         base_path = self["base_path"][location]
         paths = {
             "project": base_path,
