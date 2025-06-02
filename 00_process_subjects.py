@@ -44,7 +44,7 @@ def parse_args():
     parser.add_argument(
         "-m",
         "--surface-recon-method",
-        choices=["mcribs", "freesurfer"],
+        choices=["mcribs", "infantfs"],
         default="freesurfer",
         dest="surface_recon_method",
         help="surface reconstruction method. Must be 'mcribs' or 'freesurfer'.",
