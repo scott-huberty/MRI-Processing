@@ -628,7 +628,7 @@ def create_precomputed_jsons(
     >>> from utils.utils import create_precomputed_jsons
     >>> create_precomputed_jsons(
     ...     precomputed_nifti_fpath="/Users/sealab/MRI_Processing/BABIES/derivatives/precomputed/sub-1401/anat/sub-1401_ses-newborn_space-T2w_desc-aseg_dseg.nii.gz",
-    ...     precopmuted_brain_mask_fpath="/Users/sealab/MRI_Processing/BABIES/derivatives/precomputed/sub-1401/anat/sub-1401_ses-newborn_space-T2w_desc-brain_mask.nii.gz",
+    ...     precomputed_brain_mask_fpath="/Users/sealab/MRI_Processing/BABIES/derivatives/precomputed/sub-1401/anat/sub-1401_ses-newborn_space-T2w_desc-brain_mask.nii.gz",
     ...     spatial_reference_fpath="/Users/sealab/MRI_Processing/BABIES/bids/subject/session/anat/sub-1401_ses-newborn_T2w.nii.gz",
     ...     )
     """
@@ -636,8 +636,8 @@ def create_precomputed_jsons(
     aseg_nifti_fpath = Path(precomputed_nifti_fpath).expanduser().resolve()
     brain_mask_fpath = Path(precomputed_brain_mask_fpath).expanduser().resolve()
 
-    aseg_json_fpath = aseg_nifti_fpath.with_suffix(".json")
-    brain_mask_json_fpath = brain_mask_fpath.with_suffix(".json")
+    aseg_json_fpath = Path(str(aseg_nifti_fpath).replace(".nii.gz", ".json"))
+    brain_mask_json_fpath = Path(str(brain_mask_fpath).replace(".nii.gz", ".json"))
     bids_index = Path(spatial_reference_fpath).parts.index("bids")
     bpath = Path(*spatial_reference_fpath.parts[: bids_index + 1])
     spatial_reference_fname = spatial_reference_fpath.relative_to(bpath)
