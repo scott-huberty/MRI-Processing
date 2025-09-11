@@ -7,7 +7,7 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks=4
 #SBATCH --mem=50G
-#SBATCH --time=1:00:00
+#SBATCH --time=2:00:00
 #SBATCH --output=./log/%j.out
 
 

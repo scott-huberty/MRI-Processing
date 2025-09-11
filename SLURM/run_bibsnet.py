@@ -56,9 +56,11 @@ def main(
     session : str
         The session of the participant that should be analyzed, for example 'newborn', 'sixmonth', or 'twelvemonth'.
     image_path : str, optional
-        Absolute path to the BIBSnet image. If ``None`` is provided (default), Then function will use the image stored on The Humphreys Lab DORS server: ``/gpfs51/dors2/l3_humphreys_lab/dev/images/bibsnet_fork.sil``.
+        Absolute path to the BIBSnet image. If ``None`` is provided (default), 
+        Then function will use the image stored on The Humphreys Lab DORS server: ``/gpfs51/dors2/l3_humphreys_lab/dev/images/bibsnet_fork.sil`` (Expired on September 2025)
+        ``/home/niuy3/singularity/bibsnet_fork.sil``.
     """
-    dors_image_path = Path("/gpfs51/dors2/l3_humphreys_lab/dev/images/bibsnet_fork.sif")
+    dors_image_path = Path("/home/niuy3/singularity/bibsnet_fork.sif")
     image_path = Path(image_path) if image_path is not None else dors_image_path
     if not isinstance(image_path, Path):
         raise TypeError(f"image_path must be a string or a Path object, got {type(image_path)} instead.")
@@ -71,7 +73,7 @@ def main(
     mri_processing_dir = slurm_dir.parent
     bids_path = (mri_processing_dir / project / "MRI" / session_dir / "bids").absolute()
     derivatives_path = (mri_processing_dir / project / "MRI" / session_dir / "derivatives").absolute()
-    work_path = Path("/gpfs51/dors2/l3_humphreys_lab/bibsnet_work")
+    work_path = Path("/home/niuy3/MRI-Processing/ABC/MRI/newborn/derivatives/work/bibsnet_work")
     if not bids_path.exists():
         raise FileNotFoundError(f"BIDS directory not found: {bids_path}")
     if not derivatives_path.exists():
