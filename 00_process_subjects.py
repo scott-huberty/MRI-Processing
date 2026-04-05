@@ -36,7 +36,7 @@ def parse_args():
         "-S",
         "--session",
         required=True,
-        choices=["newborn", "sixmonth"],
+        choices=["newborn", "sixmonth", "twelvemonth"],
         dest="session",
         type=str,
         help="session label. such as 'newborn' or 'sixmonth'",
