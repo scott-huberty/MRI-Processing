@@ -32,9 +32,9 @@ def rsync_to_server(project, subject, session, dry_run=False, verbose="INFO"):
         raise ValueError("project must be either 'BABIES' or 'ABC', but got: {project}")
     if not subject.isnumeric():
         raise ValueError("subject must be a number, but got: {subject}")
-    if session not in ["newborn", "six_month", "sixmonth"]:
+    if session not in ["newborn", "six_month", "twelvemonth"]:
         raise ValueError(
-            "session must be either 'newborn' or 'six_month', but got: {session}"
+            "session must be in 'newborn', 'six_month' and 'twelvemonth', but got: {session}"
         )
     if project == "ABC" and session == "six_month":
         session = "sixmonth"
@@ -207,10 +207,9 @@ def download_bids_directory(
             f"subject_id must be a string or number, but got: {subject_id}\n"
             "Example: 12001 for sub-12001"
         )
-    if session not in ["newborn", "sixmonth"]:
+    if session not in ["newborn", "six_month", "twelvemonth"]:
         raise ValueError(
-            "session must be either 'newborn' or 'sixmonth',"
-            f" but got: {session}"
+            "session must be in 'newborn', 'six_month' and 'twelvemonth', but got: {session}"
         )
     if not isinstance(anat, bool):
         raise ValueError(f"anat_only must be a True or False, but got: {anat}")
@@ -379,10 +378,9 @@ def download_derivative_directory(
             "Example: 12001 for sub-12001"
         )
 
-    if session not in ["newborn", "sixmonth"]:
+    if session not in ["newborn", "six_month", "twelvemonth"]:
         raise ValueError(
-            "session must be either 'newborn' or 'sixmonth',"
-            f" but got: {session}"
+            "session must be in 'newborn', 'six_month' and 'twelvemonth', but got: {session}"
         )
     if not isinstance(dry_run, bool):
         raise ValueError(f"dry_run must be a True or False, but got: {dry_run}")
@@ -492,10 +490,9 @@ def pull_subject_files(
         )
     subject = f"sub-{subject_id}"
 
-    if session not in ["newborn", "six_month"]:
+    if session not in ["newborn", "six_month", "twelvemonth"]:
         raise ValueError(
-            f"session must be either 'newborn' 'sixmonth', or 'six_month',"
-            " but got: {session}"
+            "session must be in 'newborn', 'six_month' and 'twelvemonth', but got: {session}"
         )
     if not isinstance(anat_only, bool):
         raise ValueError(f"anat_only must be a True or False, but got: {anat_only}")
