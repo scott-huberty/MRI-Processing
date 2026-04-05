@@ -49,7 +49,7 @@ def parse_args():
         )
     parser.add_argument(
         '--session',
-        choices=["newborn", "sixmonth"],
+        choices=["newborn", "sixmonth", "twelvemonth"],
         required=True,
         dest='session',
         type=str,
@@ -57,11 +57,11 @@ def parse_args():
         )
     parser.add_argument(
         "--surface-recon-method",
-        choices=["mcribs", "freesurfer"],
+        choices=["mcribs", "infantfs"],
         required=True,
         dest="surface_recon_method",
         type=str,
-        help="surface reconstruction method, such as mcribs or freesurfer."
+        help="surface reconstruction method, such as mcribs or infantfs."
         )
     parser.add_argument(
         "--anat-only",

@@ -88,7 +88,7 @@ def run_nibabies(
         "/data",
         "/out",
         "participant",
-        "--age-months", "1" if session == "newborn" else "6",
+        "--age-months", "1" if session == "newborn" else "12" if session == "twelvemonth" else "12",
         "--participant-label", subject,
         "--derivatives", "/opt/derivatives/precomputed",
         "-w", "/scratch",
