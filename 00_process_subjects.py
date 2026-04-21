@@ -50,6 +50,18 @@ def parse_args():
         help="surface reconstruction method. Must be 'mcribs' or 'freesurfer'.",
     )
     parser.add_argument(
+        "--space",
+        choices=["T1w", "T2w"],
+        default="T2w",
+        dest="space",
+        help=(
+            "Space label to use for the precomputed aseg / brain_mask files"
+            " (i.e. the 'space-T1w' or 'space-T2w' entity in the filename, and the"
+            " corresponding *_T1w.nii.gz or *_T2w.nii.gz referenced in the JSON"
+            " SpatialReference). Default is 'T2w'."
+        ),
+    )
+    parser.add_argument(
         "--anat_only",
         action="store_true",
         dest="anat_only",
@@ -102,6 +114,7 @@ def process_one_subject(
     nibabies_path=None,
     login_name=None,
     host_name=None,
+    space="T2w",
 ):
     """Process one subject. Use subprocess to run individual scripts."""
     print(f" 👇 Processing started for subject {subject} {session}👇 \n")
@@ -117,6 +130,7 @@ def process_one_subject(
         login_name=login_name,
         host_name=host_name,
         download_bids_dir_kwargs=download_bids_dir_kwargs,
+        create_precomputed_nifties_kwargs={"space": space},
     )
     # run nibabies
     _1_run_nibabies.main(
@@ -159,6 +173,7 @@ def main(**kwargs):
     nibabies_path = kwargs.get("nibabies_path", None)
     host_name = kwargs.get("host_name", None)
     login_name = kwargs.get("login_name", None)
+    space = kwargs.get("space", "T2w")
 
     assert isinstance(anat_only, bool), "anat_only must be a boolean."
     subject_success_file = Path(f"./logs/{project}_subject_success.txt")
@@ -179,6 +194,7 @@ def main(**kwargs):
                 nibabies_path=nibabies_path,
                 host_name=host_name,
                 login_name=login_name,
+                space=space,
             )
         except Exception as e:
             mgs = f"❌ Error processing subject {subject}: {e}"
