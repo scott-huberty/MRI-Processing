@@ -94,11 +94,10 @@ def run_nibabies(
         "-w", "/scratch",
         "--surface-recon-method", surface_recon_method,
         ])
-    if not anat_only:
-        command.extend([
-            "--cifti-output", "91k",
-            ])
-    else:
+    command.extend([
+        "--cifti-output", "91k",
+        ])
+    if anat_only:
         command.extend([
             "--anat-only",
             ])
