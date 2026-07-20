@@ -109,6 +109,10 @@ def prepare_subject_files(
     if create_precomputed_jsons_kwargs is None:
         create_precomputed_jsons_kwargs = {}
 
+    space = create_precomputed_nifties_kwargs.get("space", None)
+    if space is None:
+        space = "T2w"  # Default when the source nifti filename has no space entity.
+
     subject_id = str(subject_id)
 
     if not server_is_mounted:
@@ -184,7 +188,7 @@ def prepare_subject_files(
     if dry_run:
         return # don't check paths or rename/move files
 
-    config.get_spatial_file()
+    config.get_spatial_file(space=space)
     config.check_paths(local=True, server=False, mode="error")
     
     
@@ -198,7 +202,6 @@ def prepare_subject_files(
     aseg_nifti_fpath = create_precomputed_nifties_kwargs.get("aseg_nifti_fpath", None)
     brain_mask_fpath = create_precomputed_nifties_kwargs.get("brain_mask_fpath", None)
     precomputed_dir = create_precomputed_nifties_kwargs.get("precomputed_dir", None)
-    space = create_precomputed_nifties_kwargs.get("space", None)
     overwrite = create_precomputed_nifties_kwargs.get("overwrite", True) # we are overriding the default value of False
     if aseg_nifti_fpath is None:
         aseg_nifti_dir = derivative_dir / f"sub-{subject_id}"
@@ -243,8 +246,6 @@ def prepare_subject_files(
             "derivatives" /
             "precomputed"
         )
-    if space is None:
-        space = "T2w" # this only matters if the nifti file does not have the space in the name
     create_precomputed_nifties(
         aseg_nifti_fpath=aseg_nifti_fpath,
         brain_mask_fpath=brain_mask_fpath,
